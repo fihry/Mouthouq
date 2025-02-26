@@ -95,7 +95,8 @@ Mawthouq/
 │   ├── API_DOCS.md          # API documentation
 │   ├── ARCHITECTURE.md      # System architecture
 │   ├── BUSINESS_MODEL.md    # Business model canvas
-│   └── ROADMAP.md           # Future plans
+│   ├── ROADMAP.md           # Future plans
+|   └── Mawthouq_Booklet.pdf # Booklet that describes the project
 │
 │── infra/                   # Infrastructure as code
 │   ├── docker-compose.yml   # Docker services
