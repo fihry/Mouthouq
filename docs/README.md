@@ -19,3 +19,4 @@ Our platform connects users with trusted professionals for household services li
 - **Rating & Review System**: Users evaluate professionals after completing services, ensuring quality and fostering competition.
 - **Revenue Model**: We will offer a subscription model or charge a percentage on services completed through the platform.
 - **AI Features**: To be integrated in the future to recommend the best professionals based on user preferences and job history.
+
