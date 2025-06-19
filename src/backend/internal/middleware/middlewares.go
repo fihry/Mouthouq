@@ -12,6 +12,17 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		// TODO: validate token
+
+		// Add JWT validation
+		claims, err := ValidateToken(token)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		// Add user info to context
+		c.Set("userId", claims.UserId)
+		c.Next()
 	}
 }

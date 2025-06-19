@@ -1,32 +1,34 @@
 # Server configuration
 server:
-  host: "localhost"
-  port: 8080
+  host: ${SERVER_HOST}
+  port: ${SERVER_PORT}
+
 # Database configuration
 database:
-  host: "localhost"
-  port: 5432
-  name: "mydatabase"
-  user: "myuser"
-  password: "mypassword"
+  host: ${DB_HOST}
+  port: ${DB_PORT}
+  name: ${DB_NAME}
+  user: ${DB_USER}
+  password: ${DB_PASSWORD}
+
 # Logging configuration
 logging:
-  level: "INFO"
-  file: "/var/log/myapp.log"
+  level: ${LOG_LEVEL}
+  file: ${LOG_FILE}
+
 # Security configuration
 security:
-  jwtSecret: "the-secret-key"
-  tokenExpiration: 3600
-  # CROS configuration
+  jwtSecret: ${JWT_SECRET}
+  tokenExpiration: ${JWT_EXPIRATION}
+
+# CORS configuration
 cors:
-    allowedOrigins: ["http://localhost:3000"]
-    allowedMethods: ["GET", "POST", "PUT", "DELETE"]
-    allowedHeaders: ["Content-Type", "Authorization"]
-# Existing configuration...
+  allowedOrigins: ["http://localhost:3000"]
+  allowedMethods: ["GET", "POST", "PUT", "DELETE"]
+  allowedHeaders: ["Content-Type", "Authorization"]
 
 # MinIO configuration
 minio:
-  endpoint: "localhost:9000"
-  accessKey: "minioadmin"
-  secretKey: "minioadmin"
-  useSSL: false
+  endpoint: ${MINIO_ENDPOINT}
+  accessKey: ${MINIO_ACCESS_KEY}
+  secretKey: ${MINIO_SECRET_KEY}
