@@ -12,6 +12,7 @@ import (
 
 type Config struct {
 	Server struct {
+		Host string `yaml:"host"`
 		Port string `yaml:"port"`
 	} `yaml:"server"`
 
@@ -32,10 +33,11 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	// Load .env file (don't error if file doesn't exist)
 	err := godotenv.Load()
 	if err != nil {
 		log.Printf("Warning: .env file not found")
+	} else {
+		log.Println(".env file loaded successfully")
 	}
 
 	// Get config file path
@@ -47,17 +49,12 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	var cfg Config
-	if err := yaml.Unmarshal(yamlFile, &cfg); err != nil {
-		return nil, fmt.Errorf("error parsing config file: %w", err)
-	}
+	// Substitute environment variables
+	yamlString := os.ExpandEnv(string(yamlFile))
 
-	// Override with environment variables
-	if envPort := os.Getenv("SERVER_PORT"); envPort != "" {
-		cfg.Server.Port = envPort
-	} else {
-		// Default port if not set
-		cfg.Server.Port = "8080"
+	var cfg Config
+	if err := yaml.Unmarshal([]byte(yamlString), &cfg); err != nil {
+		return nil, fmt.Errorf("error parsing config file: %w", err)
 	}
 
 	return &cfg, nil
