@@ -58,7 +58,7 @@ npm run dev
 ## Documentation
 
 Internal documentation is available in the `docs` folder:
-- [The Mouthouq Booklet](./docs/Mawthouq_Booklet.pdf)
+- [The Mouthouq Booklet](./docs/Mouthouq_Booklet.pdf)
 - [API Documentation](./docs/API_DOCS.md)
 - [Development Roadmap](./docs/ROADMAP.md)
 - [Architecture Guide](./docs/ARCHITECTURE.md)

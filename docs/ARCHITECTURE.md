@@ -1,4 +1,4 @@
-# Mawthouq - Project Structure & Tools
+# Mouthouq - Project Structure & Tools
 
 ## 🔹 **Backend Development (Go + PostgreSQL)**
 - **Gin** – Lightweight HTTP web framework for Go.  
@@ -49,7 +49,7 @@
 - **Figma** – UI/UX design prototyping.
 ## 🔹 **project tree
 ```tree
-Mawthouq/
+Mouthouq/
 │── backend/                 # Go backend
 │   ├── main.go              # Entry point
 │   ├── config/              # Configuration files
@@ -96,7 +96,7 @@ Mawthouq/
 │   ├── ARCHITECTURE.md      # System architecture
 │   ├── BUSINESS_MODEL.md    # Business model canvas
 │   ├── ROADMAP.md           # Future plans
-|   └── Mawthouq_Booklet.pdf # Booklet that describes the project
+|   └── Mouthouq_Booklet.pdf # Booklet that describes the project
 │
 │── infra/                   # Infrastructure as code
 │   ├── docker-compose.yml   # Docker services

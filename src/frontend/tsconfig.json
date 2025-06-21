@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/components/shared/mouthouq-original-logo.jsx", "src/app/not-found.jsx", "src/app/(auth)/register/page.jsx"],
   "exclude": ["node_modules"]
 }
