@@ -830,7 +830,12 @@ export default function ServicesPage() {
                         <label className="flex items-center cursor-pointer group">
                           <Checkbox
                             checked={showEmergencyOnly}
-                            onCheckedChange={setShowEmergencyOnly}
+                            onCheckedChange={(checked) => {
+                              if (checked !== "indeterminate") {
+                                setShowEmergencyOnly(checked);
+                              }
+                            }}
+                            
                             className="border-orange-300 text-orange-600 focus:ring-orange-500"
                           />
                           <span className="ml-3 text-orange-700 group-hover:text-orange-600 transition-colors flex items-center">
