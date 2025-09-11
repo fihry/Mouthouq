@@ -48,12 +48,44 @@ npm install
 ```bash
 # Backend
 cd src/backend
-go run main.go
+go run cmd/main.go
 
 # Frontend
 cd src/frontend
 npm run dev
 ```
+
+4. Setup database (creates cluster, user, database, runs migrations):
+```bash 
+# Setup database
+make db-setup
+```
+
+5. Run migrations manually (optional):
+```bash
+   # Migrate up
+make migrate-up
+
+# Migrate down (rollback)
+make migrate-down
+
+# Create a new migration
+make migrate-create name=add_table_xyz
+```
+6. Run development servers:
+```bash
+# Backend
+make run-backend
+
+# Frontend
+make run-frontend
+```
+
+7. View backend logs:
+```bash
+make logs
+```
+
 
 ## Documentation
 
