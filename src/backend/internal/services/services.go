@@ -22,7 +22,7 @@ func (s *ServiceService) List() ([]models.Service, error) {
 }
 
 func (s *ServiceService) Get(id uint) (*models.Service, error) {
-	return s.repo.Get(id)
+	return s.repo.FindByID(id)
 }
 
 func (s *ServiceService) Update(service *models.Service) error {

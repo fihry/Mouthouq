@@ -9,7 +9,7 @@ services:
       - .env
     environment:
       POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}  # Add this line
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -38,6 +38,11 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - DB_HOST=postgres
+      - MINIO_ENDPOINT=minio:9000
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8000
     depends_on:
       postgres:
         condition: service_healthy
@@ -45,9 +50,10 @@ services:
         condition: service_started
     networks:
       - mouthouq_network
-    volumes:
-      - ./src/backend:/app
-      - /app/tmp
+    # Remove volume mapping to use the built image binary
+    # volumes:
+    #   - ./src/backend:/app
+    #   - /app/tmp
 
   frontend:
     build:
@@ -62,10 +68,11 @@ services:
       - backend
     networks:
       - mouthouq_network
-    volumes:
-      - ./src/frontend:/app
-      - /app/node_modules
-      - /app/.next
+    # Remove volume mapping to use the built image
+    # volumes:
+    #   - ./src/frontend:/app
+    #   - /app/node_modules
+    #   - /app/.next
 
   minio:
     image: minio/minio
@@ -89,4 +96,4 @@ volumes:
 networks:
   mouthouq_network:
     driver: bridge
-    internal: true
+    internal: false

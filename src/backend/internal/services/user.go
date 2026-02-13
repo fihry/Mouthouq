@@ -14,7 +14,7 @@ func NewUserService(repo *repositories.UserRepository) *UserService {
 }
 
 func (s *UserService) GetByID(id uint) (*models.User, error) {
-	return s.repo.GetByID(id)
+	return s.repo.FindByID(id)
 }
 
 func (s *UserService) Update(user *models.User) error {

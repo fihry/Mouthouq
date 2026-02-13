@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary
-RUN go build -o /out/backend main.go
+RUN go build -o /out/backend cmd/main.go
 
 # Stage 2: Create a minimal image to run the app
 FROM alpine:3.14
@@ -26,8 +26,11 @@ RUN apk add --no-cache libc6-compat
 # Copy the compiled Go binary from the builder stage
 COPY --from=builder /out/backend /app/backend
 
-# Copy environment file
-COPY .env .
+# Copy configuration and migrations
+COPY internal/config /app/internal/config
+COPY internal/database/migrations /app/internal/database/migrations
+
+# Environment variables will be handled by docker-compose env_file
 
 # Expose the port your app will run on
 EXPOSE 8000

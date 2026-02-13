@@ -16,16 +16,17 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve Stage
-FROM nginx:alpine
+FROM node:20-alpine
 
-# Copy the static assets, public files, and server output from the builder stage
-COPY --from=builder /app/.next/static /usr/share/nginx/html/.next/static
-COPY --from=builder /app/public /usr/share/nginx/html
-COPY --from=builder /app/.next/server /usr/share/nginx/html/.next/server
+WORKDIR /app
 
-# Copy the next.config.ts from the builder stage
-COPY --from=builder /app/next.config.ts /usr/share/nginx/html/next.config.ts
+# Copy the built app and dependencies
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+# COPY --from=builder /app/public ./public # Commented out as it's missing
 
 EXPOSE 3000
 
-CMD ["nginx", "-g", "daemon off;"]
+# Start the Next.js app
+CMD ["npm", "run", "start"]

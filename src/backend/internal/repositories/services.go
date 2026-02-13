@@ -24,7 +24,7 @@ func (r *ServiceRepository) List() ([]models.Service, error) {
 	return services, err
 }
 
-func (r *ServiceRepository) Get(id uint) (*models.Service, error) {
+func (r *ServiceRepository) FindByID(id uint) (*models.Service, error) {
 	var service models.Service
 	err := r.db.First(&service, id).Error
 	return &service, err
