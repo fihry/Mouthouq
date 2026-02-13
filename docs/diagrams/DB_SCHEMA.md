@@ -134,170 +134,8 @@ CREATE INDEX idx_reviews_service ON reviews(service_id);
 CREATE INDEX idx_reviews_user ON reviews(user_id);
 ```
 
-## Collections Schema (MongoDB)
 
-### Users Collection
-```javascript
-{
-  _id: ObjectId,
-  username: String,
-  email: String,
-  password: String (hashed),
-  phoneNumber: String,
-  location: {
-    city: String,
-    address: String,
-    coordinates: {
-      latitude: Number,
-      longitude: Number
-    }
-  },
-  role: String (enum: ['user', 'admin']),
-  createdAt: Date,
-  updatedAt: Date,
-  isVerified: Boolean,
-  profileImage: String (URL)
-}
-```
-
-### Services Collection
-```javascript
-{
-  _id: ObjectId,
-  providerId: ObjectId (ref: 'Users'),
-  title: String,
-  description: String,
-  category: String,
-  price: {
-    amount: Number,
-    currency: String,
-    unit: String (enum: ['hour', 'job', 'day'])
-  },
-  location: {
-    city: String,
-    coordinates: {
-      latitude: Number,
-      longitude: Number
-    }
-  },
-  images: [String] (URLs),
-  availability: {
-    schedule: [{
-      day: String,
-      hours: [String]
-    }],
-    isActive: Boolean
-  },
-  rating: {
-    average: Number,
-    count: Number
-  },
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-### Reviews Collection
-```javascript
-{
-  _id: ObjectId,
-  serviceId: ObjectId (ref: 'Services'),
-  userId: ObjectId (ref: 'Users'),
-  rating: Number (1-5),
-  comment: String,
-  images: [String] (URLs),
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-### Orders Collection
-```javascript
-{
-  _id: ObjectId,
-  serviceId: ObjectId (ref: 'Services'),
-  clientId: ObjectId (ref: 'Users'),
-  providerId: ObjectId (ref: 'Users'),
-  status: String (enum: ['pending', 'accepted', 'completed', 'cancelled']),
-  price: {
-    amount: Number,
-    currency: String
-  },
-  scheduledDate: Date,
-  location: {
-    address: String,
-    coordinates: {
-      latitude: Number,
-      longitude: Number
-    }
-  },
-  paymentStatus: String (enum: ['pending', 'paid', 'refunded']),
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-### Messages Collection
-```javascript
-{
-  _id: ObjectId,
-  orderId: ObjectId (ref: 'Orders'),
-  senderId: ObjectId (ref: 'Users'),
-  receiverId: ObjectId (ref: 'Users'),
-  content: String,
-  type: String (enum: ['text', 'image']),
-  isRead: Boolean,
-  createdAt: Date
-}
-```
-
-### Notifications Collection
-```javascript
-{
-  _id: ObjectId,
-  userId: ObjectId (ref: 'Users'),
-  type: String (enum: ['order', 'message', 'system']),
-  title: String,
-  message: String,
-  isRead: Boolean,
-  relatedId: ObjectId,
-  createdAt: Date
-}
-```
-
-## Indexes
-```javascript
-// Users Collection
-{ "email": 1 } // unique
-{ "username": 1 } // unique
-{ "location.city": 1 }
-
-// Services Collection
-{ "category": 1 }
-{ "location.city": 1 }
-{ "providerId": 1 }
-
-// Orders Collection
-{ "clientId": 1 }
-{ "providerId": 1 }
-{ "status": 1 }
-
-// Messages Collection
-{ "orderId": 1 }
-{ "senderId": 1 }
-{ "receiverId": 1 }
-
-// Reviews Collection
-{ "serviceId": 1 }
-{ "userId": 1 }
-```
-
-
-
-
-
-
-
+## ER Diagram
 ```mermaid
 erDiagram
     USERS ||--o{ SERVICES : provides
@@ -306,63 +144,60 @@ erDiagram
     ORDERS ||--o{ MESSAGES : contains
 
     USERS {
-        ObjectId _id PK
+        int id PK
         string username UK
         string email UK
         string password
-        string phoneNumber
-        object location
+        string phone_number
         string role
-        boolean isVerified
-        date createdAt
+        boolean is_verified
+        timestamp created_at
     }
 
     SERVICES {
-        ObjectId _id PK
-        ObjectId providerId FK
+        int id PK
+        int provider_id FK
         string title
         string description
-        object price
-        object location
-        array images
-        object availability
-        object rating
-        date createdAt
+        decimal price_amount
+        string price_currency
+        string city
+        boolean is_active
+        timestamp created_at
     }
 
     ORDERS {
-        ObjectId _id PK
-        ObjectId serviceId FK
-        ObjectId clientId FK
-        ObjectId providerId FK
+        int id PK
+        int service_id FK
+        int client_id FK
+        int provider_id FK
         string status
-        object price
-        date scheduledDate
-        object location
-        string paymentStatus
-        date createdAt
+        decimal price_amount
+        timestamp scheduled_date
+        string payment_status
+        timestamp created_at
     }
 
     REVIEWS {
-        ObjectId _id PK
-        ObjectId serviceId FK
-        ObjectId userId FK
-        number rating
+        int id PK
+        int service_id FK
+        int user_id FK
+        int rating
         string comment
-        array images
-        date createdAt
+        timestamp created_at
     }
 
     MESSAGES {
-        ObjectId _id PK
-        ObjectId orderId FK
-        ObjectId senderId FK
-        ObjectId receiverId FK
+        int id PK
+        int order_id FK
+        int sender_id FK
+        int receiver_id FK
         string content
         string type
-        boolean isRead
-        date createdAt
+        boolean is_read
+        timestamp created_at
     }
+```
 
 
 

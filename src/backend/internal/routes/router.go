@@ -15,12 +15,12 @@ type Handlers struct {
 	service *handlers.ServiceHandler
 }
 
-func NewHandlers(db *gorm.DB) *Handlers {
+func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler) *Handlers {
 	return &Handlers{
 		db:      db,
-		auth:    handlers.NewAuthHandler(db),
-		users:   handlers.NewUserHandler(db),
-		service: handlers.NewServiceHandler(db),
+		auth:    auth,
+		users:   users,
+		service: service,
 	}
 }
 

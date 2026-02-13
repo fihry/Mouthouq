@@ -5,7 +5,10 @@ import (
 
 	"mouthouq/internal/config"
 	"mouthouq/internal/database"
+	"mouthouq/internal/handlers"
+	"mouthouq/internal/repositories"
 	"mouthouq/internal/routes"
+	"mouthouq/internal/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -27,7 +30,7 @@ func main() {
 	// Initialize Gin
 	r := gin.Default()
 
-	// Setup routes with db
+	// Setup routes and wire dependencies
 	setupServer(r, db)
 
 	// Start server
@@ -36,9 +39,24 @@ func main() {
 }
 
 func setupServer(r *gin.Engine, db *gorm.DB) {
-	// Initialize handlers with db
-	handlers := routes.NewHandlers(db)
+	// Initialize Repositories
+	authRepo := repositories.NewAuthRepository(db)
+	userRepo := repositories.NewUserRepository(db)
+	serviceRepo := repositories.NewServiceRepository(db)
+
+	// Initialize Services
+	authService := services.NewAuthService(authRepo)
+	userService := services.NewUserService(userRepo)
+	serviceService := services.NewServiceService(serviceRepo)
+
+	// Initialize Handlers
+	authHandler := handlers.NewAuthHandler(authService)
+	userHandler := handlers.NewUserHandler(userService)
+	serviceHandler := handlers.NewServiceHandler(serviceService)
+
+	// Create routes Handlers container
+	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler)
 
 	// Setup routes
-	routes.SetupRoutes(r, handlers)
+	routes.SetupRoutes(r, h)
 }

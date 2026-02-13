@@ -5,21 +5,18 @@ import (
 	"strconv"
 
 	"mouthouq/internal/models"
-	"mouthouq/internal/repositories"
 	"mouthouq/internal/services"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type UserHandler struct {
 	service *services.UserService
 }
 
-func NewUserHandler(db *gorm.DB) *UserHandler {
-	repo := repositories.NewUserRepository(db)
+func NewUserHandler(service *services.UserService) *UserHandler {
 	return &UserHandler{
-		service: services.NewUserService(repo),
+		service: service,
 	}
 }
 
@@ -54,7 +51,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	}
 	user.ID = uint(id)
 	if err := h.service.Update(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -69,7 +66,7 @@ func (h *UserHandler) DeleteProfile(c *gin.Context) {
 		return
 	}
 	if err := h.service.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete profile"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
