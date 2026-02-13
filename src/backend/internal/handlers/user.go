@@ -20,15 +20,29 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 	}
 }
 
-// Get user profile by ID (e.g., /users/:id)
+// Get user profile (either by ID param or from authenticated context)
 func (h *UserHandler) GetProfile(c *gin.Context) {
+	var userID uint
+
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
+	if idParam != "" {
+		id, err := strconv.Atoi(idParam)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+		userID = uint(id)
+	} else {
+		// Try to get from authenticated context
+		val, exists := c.Get("userId")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+		userID = val.(uint)
 	}
-	user, err := h.service.GetByID(uint(id))
+
+	user, err := h.service.GetByID(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -38,18 +52,31 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 // Update user profile
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	var userID uint
+
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
+	if idParam != "" {
+		id, err := strconv.Atoi(idParam)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+		userID = uint(id)
+	} else {
+		val, exists := c.Get("userId")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+		}
+		userID = val.(uint)
 	}
+
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user.ID = uint(id)
+	user.ID = userID
 	if err := h.service.Update(&user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update profile"})
 		return

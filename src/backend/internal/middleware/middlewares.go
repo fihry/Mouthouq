@@ -1,10 +1,13 @@
 package middleware
 
 import (
+	"mouthouq/internal/utils/jwt"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 		if token == "" {
@@ -13,8 +16,14 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Add JWT validation
-		claims, err := ValidateToken(token)
+		// Remove "Bearer " prefix
+		token = strings.TrimPrefix(token, "Bearer ")
+
+		// jwt utility already handles "Bearer " prefixing if implemented,
+		// but let's be explicit if needed. My utility doesn't yet.
+		// Use strings.TrimPrefix in utility or here.
+
+		claims, err := jwt.ValidateToken(token, secret)
 		if err != nil {
 			c.JSON(401, gin.H{"error": "Invalid token"})
 			c.Abort()
@@ -22,7 +31,8 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// Add user info to context
-		c.Set("userId", claims.UserId)
+		c.Set("userId", claims.UserID)
+		c.Set("role", claims.Role)
 		c.Next()
 	}
 }

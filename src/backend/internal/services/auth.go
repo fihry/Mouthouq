@@ -28,6 +28,21 @@ func (s *AuthService) Register(user *models.User) error {
 		return err
 	}
 	user.Password = string(hashed)
+
+	// Set username if empty
+	if user.Username == "" {
+		user.Username = user.Email
+	}
+
+	// Map UserType from role if not already set
+	if user.UserType == "" {
+		if user.Role == "professional" {
+			user.UserType = models.TypeProfessional
+		} else {
+			user.UserType = models.TypeCustomer
+		}
+	}
+
 	return s.repo.CreateUser(user)
 }
 

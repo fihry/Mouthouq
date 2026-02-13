@@ -9,18 +9,20 @@ import (
 )
 
 type Handlers struct {
-	db      *gorm.DB
-	auth    *handlers.AuthHandler
-	users   *handlers.UserHandler
-	service *handlers.ServiceHandler
+	db        *gorm.DB
+	auth      *handlers.AuthHandler
+	users     *handlers.UserHandler
+	service   *handlers.ServiceHandler
+	jwtSecret string
 }
 
-func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler) *Handlers {
+func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, jwtSecret string) *Handlers {
 	return &Handlers{
-		db:      db,
-		auth:    auth,
-		users:   users,
-		service: service,
+		db:        db,
+		auth:      auth,
+		users:     users,
+		service:   service,
+		jwtSecret: jwtSecret,
 	}
 }
 
@@ -40,7 +42,7 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 
 		// Protected routes
 		protected := api.Group("/")
-		protected.Use(middleware.AuthMiddleware())
+		protected.Use(middleware.AuthMiddleware(h.jwtSecret))
 		{
 			// User routes
 			users := protected.Group("/users")

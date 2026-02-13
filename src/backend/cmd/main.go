@@ -31,14 +31,14 @@ func main() {
 	r := gin.Default()
 
 	// Setup routes and wire dependencies
-	setupServer(r, db)
+	setupServer(r, db, cfg)
 
 	// Start server
 	log.Printf("Server starting on port %s", cfg.Server.Port)
 	r.Run(":" + cfg.Server.Port)
 }
 
-func setupServer(r *gin.Engine, db *gorm.DB) {
+func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	// Initialize Repositories
 	authRepo := repositories.NewAuthRepository(db)
 	userRepo := repositories.NewUserRepository(db)
@@ -50,12 +50,12 @@ func setupServer(r *gin.Engine, db *gorm.DB) {
 	serviceService := services.NewServiceService(serviceRepo)
 
 	// Initialize Handlers
-	authHandler := handlers.NewAuthHandler(authService)
+	authHandler := handlers.NewAuthHandler(authService, cfg.Security.JWTSecret, cfg.Security.TokenExpiration)
 	userHandler := handlers.NewUserHandler(userService)
 	serviceHandler := handlers.NewServiceHandler(serviceService)
 
 	// Create routes Handlers container
-	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler)
+	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, cfg.Security.JWTSecret)
 
 	// Setup routes
 	routes.SetupRoutes(r, h)

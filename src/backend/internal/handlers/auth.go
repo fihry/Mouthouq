@@ -2,20 +2,30 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/services"
+	"mouthouq/internal/utils/jwt"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthHandler struct {
-	service *services.AuthService
+	service     *services.AuthService
+	jwtSecret   string
+	jwtDuration time.Duration
 }
 
-func NewAuthHandler(service *services.AuthService) *AuthHandler {
+func NewAuthHandler(service *services.AuthService, jwtSecret string, expiration string) *AuthHandler {
+	duration, err := time.ParseDuration(expiration + "h")
+	if err != nil {
+		duration = time.Hour * 24 // Fallback
+	}
 	return &AuthHandler{
-		service: service,
+		service:     service,
+		jwtSecret:   jwtSecret,
+		jwtDuration: duration,
 	}
 }
 
@@ -46,6 +56,20 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
-	// TODO: Generate JWT token here and return it
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful", "user": user.Email})
+
+	token, err := jwt.GenerateToken(user.ID, user.Email, string(user.Role), h.jwtSecret, h.jwtDuration)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful",
+		"token":   token,
+		"user": gin.H{
+			"id":    user.ID,
+			"email": user.Email,
+			"role":  user.Role,
+		},
+	})
 }

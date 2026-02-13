@@ -14,6 +14,7 @@ import {
   ReviewStep,
 } from "@/components/layout/auth-components"
 import { MouthouqOriginalLogo } from "@/components/shared/logo"
+import { apiClient } from "@/lib/api-client"
 export default function RegisterPage() {
   const [userType, setUserType] = useState("customer") // "customer" or "professional"
   const [currentStep, setCurrentStep] = useState(0)
@@ -146,9 +147,20 @@ export default function RegisterPage() {
 
       setIsLoading(true)
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 3000))
-        console.log("Registration submitted:", { ...formData, userType })
+        const response = await apiClient.post("/auth/register", {
+          ...formData,
+          role: userType === "professional" ? "professional" : "customer",
+        })
+
+        console.log("Registration successful:", response)
+
+        // If backend returns token on register, store it
+        if (response.token) {
+          localStorage.setItem("token", response.token)
+        }
+        if (response.user) {
+          localStorage.setItem("user", JSON.stringify(response.user))
+        }
 
         // Handle success - redirect to success page or dashboard
         window.location.href =
@@ -157,7 +169,7 @@ export default function RegisterPage() {
             : "/registration-success?type=customer"
       } catch (error) {
         console.error("Registration error:", error)
-        setErrors({ general: "Registration failed. Please try again." })
+        setErrors({ general: error.message || "Registration failed. Please try again." })
       } finally {
         setIsLoading(false)
       }
@@ -219,22 +231,20 @@ export default function RegisterPage() {
                 <div className="flex bg-orange-50 rounded-xl p-1 mb-6">
                   <button
                     onClick={() => setUserType("customer")}
-                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 ${
-                      userType === "customer"
-                        ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
+                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 ${userType === "customer"
+                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                      }`}
                   >
                     <User className="h-4 w-4 inline mr-2" />
                     Customer
                   </button>
                   <button
                     onClick={() => setUserType("professional")}
-                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 ${
-                      userType === "professional"
-                        ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
+                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-300 ${userType === "professional"
+                      ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                      }`}
                   >
                     <Briefcase className="h-4 w-4 inline mr-2" />
                     Professional

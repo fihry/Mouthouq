@@ -36,6 +36,11 @@ type Config struct {
 		Port     string `yaml:"port"`
 		Password string `yaml:"password"`
 	} `yaml:"redis"`
+
+	Security struct {
+		JWTSecret       string `yaml:"jwtSecret"`
+		TokenExpiration string `yaml:"tokenExpiration"`
+	} `yaml:"security"`
 }
 
 func LoadConfig() (*Config, error) {

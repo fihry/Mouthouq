@@ -30,6 +30,8 @@ const (
 type User struct {
 	ID                 uint   `gorm:"primarykey"`
 	Username           string `gorm:"unique;not null"`
+	FirstName          string
+	LastName           string
 	Email              string `gorm:"unique;not null"`
 	Password           string `gorm:"not null"`
 	PhoneNumber        string
