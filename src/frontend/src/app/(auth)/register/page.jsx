@@ -15,11 +15,13 @@ import {
 } from "@/components/layout/auth-components"
 import { MouthouqOriginalLogo } from "@/components/shared/logo"
 import { apiClient } from "@/lib/api-client"
+import { toast } from "sonner"
 export default function RegisterPage() {
   const [userType, setUserType] = useState("customer") // "customer" or "professional"
   const [currentStep, setCurrentStep] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
+    username: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -147,10 +149,20 @@ export default function RegisterPage() {
 
       setIsLoading(true)
       try {
-        const response = await apiClient.post("/auth/register", {
-          ...formData,
-          role: userType === "professional" ? "professional" : "customer",
-        })
+        // Prepare payload matching backend User model
+        const payload = {
+          username: formData.username,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          phoneNumber: formData.phone,
+          city: formData.city,
+          userType: userType === "professional" ? "professional" : "customer",
+          role: "user", // Default role
+        }
+
+        const response = await apiClient.post("/auth/register", payload)
 
         console.log("Registration successful:", response)
 
@@ -162,14 +174,23 @@ export default function RegisterPage() {
           localStorage.setItem("user", JSON.stringify(response.user))
         }
 
-        // Handle success - redirect to success page or dashboard
-        window.location.href =
-          userType === "professional"
-            ? "/registration-success?type=professional"
-            : "/registration-success?type=customer"
+        // Show success toast
+        toast.success("Account Created Successfully!", {
+          description: `Welcome to Mouthouq! Your ${userType} account has been created.`,
+        })
+
+        // Handle success - redirect to success page or dashboard after brief delay
+        setTimeout(() => {
+          window.location.href =
+            userType === "professional"
+              ? "/registration-success?type=professional"
+              : "/registration-success?type=customer"
+        }, 500)
       } catch (error) {
         console.error("Registration error:", error)
-        setErrors({ general: error.message || "Registration failed. Please try again." })
+        toast.error("Registration Failed", {
+          description: error.message || "Registration failed. Please try again.",
+        })
       } finally {
         setIsLoading(false)
       }

@@ -18,6 +18,7 @@ import {
   Users,
   TrendingUp,
   Camera,
+  AtSign,
   Upload,
   CheckCircle,
   Building,
@@ -34,21 +35,19 @@ export const ProgressSteps = ({ steps, currentStep }) => {
         {steps.map((step, index) => (
           <div key={step.id} className="flex items-center">
             <div
-              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
-                index < currentStep
-                  ? "bg-gradient-to-r from-orange-500 to-red-500 border-orange-500 text-white"
-                  : index === currentStep
-                    ? "border-orange-500 text-orange-600 bg-orange-50"
-                    : "border-gray-300 text-gray-400"
-              }`}
+              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${index < currentStep
+                ? "bg-gradient-to-r from-orange-500 to-red-500 border-orange-500 text-white"
+                : index === currentStep
+                  ? "border-orange-500 text-orange-600 bg-orange-50"
+                  : "border-gray-300 text-gray-400"
+                }`}
             >
               {index < currentStep ? <CheckCircle className="h-5 w-5" /> : <step.icon className="h-5 w-5" />}
             </div>
             {index < steps.length - 1 && (
               <div
-                className={`w-12 sm:w-16 h-0.5 mx-2 transition-all duration-300 ${
-                  index < currentStep ? "bg-gradient-to-r from-orange-500 to-red-500" : "bg-gray-300"
-                }`}
+                className={`w-12 sm:w-16 h-0.5 mx-2 transition-all duration-300 ${index < currentStep ? "bg-gradient-to-r from-orange-500 to-red-500" : "bg-gray-300"
+                  }`}
               />
             )}
           </div>
@@ -128,6 +127,11 @@ export const BasicInfoStep = ({ formData, setFormData, errors, setErrors, onVali
   const validateStep = () => {
     const newErrors = {}
 
+    if (!formData.username?.trim()) {
+      newErrors.username = "Username is required"
+    } else if (formData.username.length < 3) {
+      newErrors.username = "Username must be at least 3 characters"
+    }
     if (!formData.firstName?.trim()) newErrors.firstName = "First name is required"
     if (!formData.lastName?.trim()) newErrors.lastName = "Last name is required"
     if (!formData.email?.trim()) {
@@ -152,13 +156,33 @@ export const BasicInfoStep = ({ formData, setFormData, errors, setErrors, onVali
 
   // Call validation whenever form data changes
   useState(() => {
-    if (formData.firstName || formData.lastName || formData.email || formData.password || formData.confirmPassword) {
+    if (formData.username || formData.firstName || formData.lastName || formData.email || formData.password || formData.confirmPassword) {
       validateStep()
     }
   }, [formData])
 
   return (
     <div className="space-y-6">
+      {/* Username Field */}
+      <div>
+        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+          Username *
+        </label>
+        <div className="relative">
+          <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Input
+            id="username"
+            type="text"
+            value={formData.username || ""}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            onBlur={validateStep}
+            className={`pl-10 ${errors.username ? "border-red-500" : ""}`}
+            placeholder="Choose a unique username"
+          />
+        </div>
+        {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -521,9 +545,8 @@ export const ProfileStep = ({ formData, setFormData, errors, setErrors, onValida
             value={formData.description || ""}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             onBlur={validateStep}
-            className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none ${
-              errors.description ? "border-red-500" : "border-gray-300"
-            }`}
+            className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none ${errors.description ? "border-red-500" : "border-gray-300"
+              }`}
             rows={4}
             placeholder="Describe your services, expertise, and what makes you unique..."
           />

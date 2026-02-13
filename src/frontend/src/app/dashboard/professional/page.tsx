@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import NavBar from "@/components/layout/NaveBar"
 import { apiClient } from "@/lib/api-client"
 import { CreateServiceModal } from "@/components/services/CreateServiceModal"
+import { toast } from "sonner"
 
 interface UserProfile {
     firstName: string;
@@ -37,6 +38,9 @@ export default function ProfessionalDashboard() {
                 setProfile(data)
             } catch (error) {
                 console.error("Failed to fetch profile:", error)
+                toast.error("Failed to load profile", {
+                    description: "Could not load your profile information. Please refresh the page.",
+                })
             } finally {
                 setIsLoading(false)
             }

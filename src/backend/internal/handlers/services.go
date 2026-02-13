@@ -21,16 +21,49 @@ func NewServiceHandler(service *services.ServiceService) *ServiceHandler {
 }
 
 func (h *ServiceHandler) Create(c *gin.Context) {
+	// Check if user is authenticated
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+		return
+	}
+
+	// Check if user is a professional
+	userRole, roleExists := c.Get("userRole")
+	if !roleExists || userRole != "professional" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only professionals can create services"})
+		return
+	}
+
 	var service models.Service
 	if err := c.ShouldBindJSON(&service); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
+
+	// Validate category
+	if !models.IsValidCategory(service.Category) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category. Please choose from supported categories."})
+		return
+	}
+
+	// Set provider ID from authenticated user
+	service.ProviderID = userID.(uint)
+
+	// New services start as inactive and unverified (pending admin approval)
+	service.IsActive = false
+	service.IsVerified = false
+	service.TrustScore = 0
+
 	if err := h.service.Create(&service); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create service"})
 		return
 	}
-	c.JSON(http.StatusCreated, service)
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Service created successfully. Pending admin approval.",
+		"service": service,
+	})
 }
 
 func (h *ServiceHandler) List(c *gin.Context) {

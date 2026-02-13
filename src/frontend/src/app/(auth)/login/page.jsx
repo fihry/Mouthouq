@@ -9,6 +9,7 @@ import { Eye, EyeOff, User, Mail, Briefcase } from "lucide-react"
 import { BenefitsSection, validateEmail } from "@/components/layout/auth-components"
 import { MouthouqOriginalLogo } from "@/components/shared/logo"
 import { apiClient } from "@/lib/api-client"
+import { toast } from "sonner"
 
 export default function LoginPage() {
   const [userType, setUserType] = useState("customer") // "customer" or "professional"
@@ -52,6 +53,7 @@ export default function LoginPage() {
     e.preventDefault()
 
     if (!validateForm()) {
+      toast.error("Please fix the errors in the form")
       return
     }
 
@@ -72,11 +74,20 @@ export default function LoginPage() {
         localStorage.setItem("user", JSON.stringify(response.user))
       }
 
-      // Handle success - redirect to dashboard
-      window.location.href = userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"
+      // Show success toast
+      toast.success("Welcome back!", {
+        description: "You have successfully logged in.",
+      })
+
+      // Handle success - redirect to dashboard after a brief delay
+      setTimeout(() => {
+        window.location.href = userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"
+      }, 500)
     } catch (error) {
       console.error("Login error:", error)
-      setErrors({ general: error.message || "Invalid email or password. Please try again." })
+      toast.error("Login Failed", {
+        description: error.message || "Invalid email or password. Please try again.",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -153,13 +164,6 @@ export default function LoginPage() {
                   <h2 className="text-2xl font-bold text-gray-900">Sign In</h2>
                   <p className="text-gray-600 mt-2">Sign in to your {userType} account</p>
                 </div>
-
-                {/* General Error */}
-                {errors.general && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-600 text-sm">{errors.general}</p>
-                  </div>
-                )}
 
                 {/* Login Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">

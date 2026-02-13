@@ -25,3 +25,27 @@ type Service struct {
 	RatingAverage    float64
 	RatingCount      int `gorm:"default:0"`
 }
+
+// SupportedCategories defines the list of allowed service categories
+var SupportedCategories = []string{
+	"Plumbing",
+	"Electrical",
+	"Cleaning",
+	"Painting",
+	"Carpentry",
+	"HVAC",
+	"Landscaping",
+	"Moving",
+	"Pest Control",
+	"Appliance Repair",
+}
+
+// IsValidCategory checks if a category is in the supported list
+func IsValidCategory(category string) bool {
+	for _, c := range SupportedCategories {
+		if c == category {
+			return true
+		}
+	}
+	return false
+}
