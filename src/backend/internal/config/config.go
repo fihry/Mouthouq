@@ -30,6 +30,12 @@ type Config struct {
 		SecretKey string `yaml:"secretKey"`
 		UseSSL    bool   `yaml:"useSSL"`
 	} `yaml:"minio"`
+
+	Redis struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Password string `yaml:"password"`
+	} `yaml:"redis"`
 }
 
 func LoadConfig() (*Config, error) {
