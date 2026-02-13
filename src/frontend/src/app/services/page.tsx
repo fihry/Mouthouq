@@ -1,16 +1,18 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Search, Grid3X3, List } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import NavBar from "@/components/layout/NaveBar"
-import { allServices } from "./services-data"
 import { ServiceCard } from "@/components/services/ServiceCard"
 import { FilterSidebar } from "./FilterSidebar"
+import { apiClient } from "@/lib/api-client"
 
 export default function ServicesPage() {
+  const [services, setServices] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("relevance")
   const [searchQuery, setSearchQuery] = useState("")
@@ -29,6 +31,50 @@ export default function ServicesPage() {
     availability: false,
     distance: false,
   })
+
+  useEffect(() => {
+    async function fetchServices() {
+      setIsLoading(true)
+      try {
+        const data = await apiClient.get("/services")
+        // Map backend to frontend expectations
+        const mapped = data.map((s: any) => ({
+          id: s.ID,
+          title: s.Title,
+          price: s.PriceAmount,
+          priceText: `From ${s.PriceAmount} ${s.PriceCurrency || "MAD"}`,
+          provider: "Verified Provider", // Needs Join or separate fetch
+          providerImage: "/placeholder.svg",
+          location: s.City || "Casablanca",
+          distance: 2.5, // Mock distance
+          rating: s.RatingAverage || 0,
+          reviews: s.RatingCount || 0,
+          image: s.Images?.[0] || "/placeholder.svg",
+          description: s.Description,
+          tags: s.Tags || [],
+          responseTime: s.ResponseTimeMins || 60,
+          responseTimeText: `< ${s.ResponseTimeMins || 60} mins`,
+          badges: [
+            ...(s.IsVerified ? ["Verified"] : []),
+            ...(s.TrustScore > 0.8 ? ["AI Match"] : [])
+          ],
+          category: s.Category,
+          availability: "24/7",
+          experience: 5,
+          completedJobs: 100,
+          isEmergency: s.Tags?.includes("Emergency") || false,
+          phone: s.Phone || "",
+          email: s.Email || ""
+        }))
+        setServices(mapped)
+      } catch (error) {
+        console.error("Failed to fetch services:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchServices()
+  }, [])
 
   const toggleFilter = (filterName: keyof typeof expandedFilters) => {
     setExpandedFilters((prev) => ({
@@ -49,7 +95,7 @@ export default function ServicesPage() {
   }
 
   const filteredAndSortedServices = useMemo(() => {
-    const filtered = allServices.filter((service) => {
+    const filtered = services.filter((service) => {
       // Search query filter
       if (
         searchQuery &&
@@ -130,6 +176,7 @@ export default function ServicesPage() {
 
     return filtered
   }, [
+    services,
     searchQuery,
     selectedCategories,
     selectedLocation,
@@ -272,7 +319,11 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Services Grid */}
-                {filteredAndSortedServices.length > 0 ? (
+                {isLoading ? (
+                  <div className="flex justify-center items-center py-24">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : filteredAndSortedServices.length > 0 ? (
                   <div className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
                     {filteredAndSortedServices.map((service) => (
                       <ServiceCard key={service.id} service={service} />

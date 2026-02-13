@@ -119,9 +119,8 @@ const StarRating = ({ rating, size = "default" }) => {
       {[...Array(5)].map((_, i) => (
         <Star
           key={i}
-          className={`${sizeClasses[size]} ${
-            i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
-          } transition-colors duration-200`}
+          className={`${sizeClasses[size]} ${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
+            } transition-colors duration-200`}
         />
       ))}
     </div>
@@ -134,9 +133,8 @@ const TestimonialCard = ({ testimonial, index, isActive = false }) => {
 
   return (
     <Card
-      className={`relative bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-2 overflow-hidden group animate-in slide-in-from-bottom-8 duration-1000 ${
-        testimonial.featured ? "ring-2 ring-orange-200" : ""
-      }`}
+      className={`relative bg-white/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-700 transform hover:-translate-y-2 overflow-hidden group animate-in slide-in-from-bottom-8 duration-1000 ${testimonial.featured ? "ring-2 ring-orange-200" : ""
+        }`}
       style={{ animationDelay: `${index * 150}ms` }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -291,11 +289,10 @@ const TestimonialCarousel = ({ testimonials }) => {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentIndex
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentIndex
                   ? "bg-gradient-to-r from-orange-500 to-red-500 scale-125"
                   : "bg-gray-300 hover:bg-orange-300"
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -356,157 +353,75 @@ const StatsSection = () => {
 }
 
 export default function TestimonialsSection() {
-  const [viewMode, setViewMode] = useState("carousel") // "carousel" or "grid"
-  const featuredTestimonials = testimonials.filter((t) => t.featured)
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
 
   return (
-    <section className="py-20 bg-gradient-to-br from-orange-50/30 via-white to-pink-50/30 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        <div
-          className="absolute inset-0 bg-repeat"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23000000' fillOpacity='0.1'%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
-
-      {/* Floating Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-20 left-10 w-20 h-20 bg-gradient-to-br from-orange-200/20 to-red-200/20 rounded-full animate-bounce"
-          style={{ animationDelay: "0s", animationDuration: "4s" }}
-        />
-        <div
-          className="absolute top-60 right-20 w-16 h-16 bg-gradient-to-br from-red-200/20 to-pink-200/20 rounded-full animate-bounce"
-          style={{ animationDelay: "2s", animationDuration: "5s" }}
-        />
-        <div
-          className="absolute bottom-40 left-1/4 w-24 h-24 bg-gradient-to-br from-pink-200/20 to-orange-200/20 rounded-full animate-bounce"
-          style={{ animationDelay: "1s", animationDuration: "6s" }}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        {/* Section Header */}
-        <div className="text-center mb-16 animate-in slide-in-from-bottom-4 duration-1000">
-          <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 mb-6 text-sm font-semibold">
-            Customer Stories
+    <section className="py-24 relative overflow-hidden bg-[#fafafa]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-20">
+          <Badge className="bg-orange-100 text-orange-700 px-6 py-2 rounded-full font-bold mb-6">
+            ✨ TRUSTED BY THOUSANDS
           </Badge>
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">What Our Customers Say</h2>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Real stories from real customers who found their perfect professionals through Mawthouq. Join thousands of
-            satisfied customers across Morocco.
-          </p>
+          <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-8 tracking-tight">
+            Customer <span className="text-red-600">Stories</span>
+          </h2>
         </div>
 
-        {/* Stats Section */}
-        <StatsSection />
-
-        {/* View Mode Toggle */}
-        <div className="flex justify-center mb-12 animate-in fade-in duration-1000 delay-600">
-          <div className="bg-white/70 backdrop-blur-sm rounded-xl p-2 shadow-lg border border-gray-200/50">
-            <Button
-              variant={viewMode === "carousel" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("carousel")}
-              className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
-                viewMode === "carousel"
-                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
-                  : "text-gray-600 hover:text-orange-600"
-              }`}
-            >
-              Carousel View
-            </Button>
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-              className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
-                viewMode === "grid"
-                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
-                  : "text-gray-600 hover:text-orange-600"
-              }`}
-            >
-              Grid View
-            </Button>
-          </div>
-        </div>
-
-        {/* Testimonials Display */}
-        {viewMode === "carousel" ? (
-          <div className="animate-in slide-in-from-bottom-8 duration-1000 delay-400">
-            <TestimonialCarousel testimonials={featuredTestimonials} />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in slide-in-from-bottom-8 duration-1000 delay-400">
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard key={testimonial.id} testimonial={testimonial} index={index} />
-            ))}
-          </div>
-        )}
-
-        {/* Trust Indicators */}
-        <div className="mt-16 text-center animate-in fade-in duration-1000 delay-1000">
-          <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-200/50 max-w-4xl mx-auto">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Trusted by Professionals & Customers</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="bg-gradient-to-br from-green-500 to-emerald-500 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle className="h-6 w-6 text-white" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Verified Reviews</h4>
-                <p className="text-sm text-gray-600">All reviews are from verified customers who completed services</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Active Testimonial (Large) */}
+          <div className="relative animate-in slide-in-from-left-10 duration-1000">
+            <Quote className="absolute -top-10 -left-10 h-32 w-32 text-orange-200/50 -z-10" />
+            <div className="bg-white p-12 rounded-[3.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)] border border-gray-50 relative">
+              <div className="flex items-center space-x-1 mb-8">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star key={s} className="h-6 w-6 text-yellow-500 fill-current" />
+                ))}
               </div>
-              <div className="text-center">
-                <div className="bg-gradient-to-br from-blue-500 to-cyan-500 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Star className="h-6 w-6 text-white" />
+              <p className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-10 italic">
+                "{testimonials[activeTestimonial].testimonial}"
+              </p>
+              <div className="flex items-center space-x-4">
+                <Avatar className="h-16 w-16 ring-4 ring-orange-100">
+                  <AvatarImage src={testimonials[activeTestimonial].avatar} />
+                  <AvatarFallback className="bg-orange-500 text-white font-bold">
+                    {testimonials[activeTestimonial].name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h4 className="text-xl font-black text-gray-900">{testimonials[activeTestimonial].name}</h4>
+                  <p className="text-gray-500 font-bold uppercase tracking-wider text-xs">{testimonials[activeTestimonial].location}</p>
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Quality Guaranteed</h4>
-                <p className="text-sm text-gray-600">100% satisfaction guarantee on all completed services</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
-                  <Users className="h-6 w-6 text-white" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2">Growing Community</h4>
-                <p className="text-sm text-gray-600">Join thousands of satisfied customers across Morocco</p>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* CTA Section */}
-        <div className="mt-16 text-center animate-in slide-in-from-bottom-12 duration-1000 delay-1200">
-          <Card className="border-0 shadow-2xl overflow-hidden">
-            <CardContent className="p-0">
-              <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white p-8 md:p-12 relative overflow-hidden">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-10">
-                  <div
-                    className="absolute inset-0 bg-repeat"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='white' fillOpacity='0.1'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E")`,
-                    }}
-                  />
+          {/* Testimonial List (Small) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in slide-in-from-right-10 duration-1000">
+            {testimonials.map((t, i) => (
+              <button
+                key={t.id}
+                onClick={() => setActiveTestimonial(i)}
+                className={`text-left p-6 rounded-[2rem] transition-all duration-300 ${activeTestimonial === i
+                    ? 'bg-orange-600 text-white shadow-xl scale-105'
+                    : 'bg-white text-gray-900 hover:bg-orange-50'
+                  }`}
+              >
+                <div className="flex items-center space-x-3 mb-4">
+                  <Avatar className="h-10 w-10 ring-2 ring-white/20">
+                    <AvatarFallback className={`${activeTestimonial === i ? 'bg-orange-500' : 'bg-gray-100'}`}>
+                      {t.name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="truncate">
+                    <h5 className="font-bold text-sm">{t.name}</h5>
+                    <p className={`text-[10px] uppercase font-black tracking-widest ${activeTestimonial === i ? 'text-orange-200' : 'text-gray-400'}`}>
+                      {t.service}
+                    </p>
+                  </div>
                 </div>
-
-                <div className="relative z-10">
-                  <h3 className="text-2xl md:text-3xl font-bold mb-4">Ready to Join Our Happy Customers?</h3>
-                  <p className="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
-                    Experience the same quality service that our customers rave about. Find your perfect professional
-                    today!
-                  </p>
-                  <Button
-                    size="lg"
-                    className="bg-white text-orange-600 px-8 py-4 rounded-xl hover:bg-orange-50 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                  >
-                    Get Started Now
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -7,13 +7,20 @@ import (
 
 type ServiceService struct {
 	repo *repositories.ServiceRepository
+	ai   *AIService
 }
 
-func NewServiceService(repo *repositories.ServiceRepository) *ServiceService {
-	return &ServiceService{repo: repo}
+func NewServiceService(repo *repositories.ServiceRepository, ai *AIService) *ServiceService {
+	return &ServiceService{repo: repo, ai: ai}
 }
 
 func (s *ServiceService) Create(service *models.Service) error {
+	// AI Analysis
+	score, isVerified, tags := s.ai.AnalyzeService(service.Title, service.Description)
+	service.TrustScore = score
+	service.IsVerified = isVerified
+	service.Tags = tags
+
 	return s.repo.Create(service)
 }
 

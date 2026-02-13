@@ -47,7 +47,8 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	// Initialize Services
 	authService := services.NewAuthService(authRepo)
 	userService := services.NewUserService(userRepo)
-	serviceService := services.NewServiceService(serviceRepo)
+	aiService := services.NewAIService()
+	serviceService := services.NewServiceService(serviceRepo, aiService)
 
 	// Initialize Handlers
 	authHandler := handlers.NewAuthHandler(authService, cfg.Security.JWTSecret, cfg.Security.TokenExpiration)

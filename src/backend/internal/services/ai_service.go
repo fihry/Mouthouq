@@ -46,3 +46,46 @@ func (s *AIService) AnalyzeReview(comment string) (isFake bool, confidence float
 
 	return false, 0.90, "Review appears genuine based on content analysis."
 }
+
+// AnalyzeService analyzes a service listing to provide a trust score and verification status.
+func (s *AIService) AnalyzeService(title, description string) (score float64, isVerified bool, tags []string) {
+	rand.Seed(time.Now().UnixNano())
+
+	score = 0.5 // Default base score
+	tags = []string{}
+
+	// Basic quality checks
+	if len(title) > 10 {
+		score += 0.1
+	}
+	if len(description) > 50 {
+		score += 0.2
+	}
+
+	// Keyword-based tag generation (Mock AI logic)
+	descriptionLower := strings.ToLower(description)
+	if strings.Contains(descriptionLower, "eco") || strings.Contains(descriptionLower, "green") {
+		tags = append(tags, "Eco-Friendly")
+		score += 0.05
+	}
+	if strings.Contains(descriptionLower, "insured") || strings.Contains(descriptionLower, "guaranteed") {
+		tags = append(tags, "Insured")
+		score += 0.05
+	}
+	if strings.Contains(descriptionLower, "same day") || strings.Contains(descriptionLower, "emergency") {
+		tags = append(tags, "Fast Response")
+		score += 0.05
+	}
+
+	// Verification logic (Simulated AI trust threshold)
+	if score >= 0.75 {
+		isVerified = true
+	}
+
+	// Final clamping
+	if score > 1.0 {
+		score = 1.0
+	}
+
+	return score, isVerified, tags
+}

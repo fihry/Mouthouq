@@ -16,8 +16,41 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import NavBar from "@/components/layout/NaveBar"
+import { apiClient } from "@/lib/api-client"
+import { CreateServiceModal } from "@/components/services/CreateServiceModal"
+
+interface UserProfile {
+    firstName: string;
+    lastName: string;
+    email: string;
+}
 
 export default function ProfessionalDashboard() {
+    const [profile, setProfile] = React.useState<UserProfile | null>(null)
+    const [isLoading, setIsLoading] = React.useState(true)
+    const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false)
+
+    React.useEffect(() => {
+        async function fetchProfile() {
+            try {
+                const data = await apiClient.get("/users/profile")
+                setProfile(data)
+            } catch (error) {
+                console.error("Failed to fetch profile:", error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchProfile()
+    }, [])
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+            </div>
+        )
+    }
 
     const stats = [
         { label: "Total Earnings", value: "12,450 MAD", icon: TrendingUp, color: "text-green-600", trend: "+12%" },
@@ -41,15 +74,20 @@ export default function ProfessionalDashboard() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <div>
                             <h1 className="text-3xl font-bold text-orange-900">Professional Dashboard</h1>
-                            <p className="text-orange-600">Welcome back, Ahmed! Here&apos;s what&apos;s happening today.</p>
+                            <p className="text-orange-600">Welcome back, {profile?.firstName || "Professional"}! Here&apos;s what&apos;s happening today.</p>
                         </div>
                         <div className="flex space-x-3">
-                            <Button className="bg-orange-600 hover:bg-orange-700">
+                            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setIsCreateModalOpen(true)}>
                                 <Plus className="h-4 w-4 mr-2" />
                                 New Service
                             </Button>
                         </div>
                     </div>
+
+                    <CreateServiceModal
+                        isOpen={isCreateModalOpen}
+                        onClose={() => setIsCreateModalOpen(false)}
+                    />
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

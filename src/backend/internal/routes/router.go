@@ -54,8 +54,8 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 			// Service routes
 			services := protected.Group("/services")
 			{
-				services.POST("/", h.service.Create)
-				services.GET("/", h.service.List)
+				services.POST("", h.service.Create)
+				services.GET("", h.service.List)
 				services.GET("/:id", h.service.Get)
 				services.PUT("/:id", h.service.Update)
 				services.DELETE("/:id", h.service.Delete)
