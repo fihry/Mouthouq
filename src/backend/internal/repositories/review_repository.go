@@ -3,6 +3,7 @@ package repositories
 import (
 	"mouthouq/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +19,7 @@ func (r *ReviewRepository) Create(review *models.Review) error {
 	return r.db.Create(review).Error
 }
 
-func (r *ReviewRepository) ListByServiceID(serviceID uint) ([]models.Review, error) {
+func (r *ReviewRepository) ListByServiceID(serviceID uuid.UUID) ([]models.Review, error) {
 	var reviews []models.Review
 	if err := r.db.Where("service_id = ?", serviceID).Preload("User").Find(&reviews).Error; err != nil {
 		return nil, err
@@ -26,7 +27,7 @@ func (r *ReviewRepository) ListByServiceID(serviceID uint) ([]models.Review, err
 	return reviews, nil
 }
 
-func (r *ReviewRepository) ExistsByServiceAndUser(serviceID, userID uint) (bool, error) {
+func (r *ReviewRepository) ExistsByServiceAndUser(serviceID, userID uuid.UUID) (bool, error) {
 	var count int64
 	if err := r.db.Model(&models.Review{}).
 		Where("service_id = ? AND user_id = ?", serviceID, userID).

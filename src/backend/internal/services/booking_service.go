@@ -6,6 +6,8 @@ import (
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
+
+	"github.com/google/uuid"
 )
 
 type BookingService struct {
@@ -29,7 +31,7 @@ func NewBookingService(
 }
 
 // CreateBooking initiates a new booking and calculates the expected commission.
-func (s *BookingService) CreateBooking(customerID uint, serviceID uint, scheduledAt time.Time, notes string) (*models.Booking, error) {
+func (s *BookingService) CreateBooking(customerID uuid.UUID, serviceID uuid.UUID, scheduledAt time.Time, notes string) (*models.Booking, error) {
 	service, err := s.serviceRepo.FindByID(serviceID)
 	if err != nil {
 		return nil, errors.New("service not found")
@@ -72,7 +74,7 @@ func (s *BookingService) CreateBooking(customerID uint, serviceID uint, schedule
 }
 
 // CompleteBooking marks a booking as completed and flags the transaction for payment processing.
-func (s *BookingService) CompleteBooking(bookingID uint) error {
+func (s *BookingService) CompleteBooking(bookingID uuid.UUID) error {
 	booking, err := s.bookingRepo.FindByID(bookingID)
 	if err != nil {
 		return err
@@ -86,7 +88,7 @@ func (s *BookingService) CompleteBooking(bookingID uint) error {
 	return s.bookingRepo.Update(booking)
 }
 
-func (s *BookingService) ConfirmBooking(bookingID uint) error {
+func (s *BookingService) ConfirmBooking(bookingID uuid.UUID) error {
 	booking, err := s.bookingRepo.FindByID(bookingID)
 	if err != nil {
 		return err
@@ -100,7 +102,7 @@ func (s *BookingService) ConfirmBooking(bookingID uint) error {
 	return s.bookingRepo.Update(booking)
 }
 
-func (s *BookingService) CancelBooking(bookingID uint) error {
+func (s *BookingService) CancelBooking(bookingID uuid.UUID) error {
 	booking, err := s.bookingRepo.FindByID(bookingID)
 	if err != nil {
 		return err
@@ -115,7 +117,7 @@ func (s *BookingService) CancelBooking(bookingID uint) error {
 	}
 }
 
-func (s *BookingService) Get(id uint) (*models.Booking, error) {
+func (s *BookingService) Get(id uuid.UUID) (*models.Booking, error) {
 	return s.bookingRepo.FindByID(id)
 }
 
@@ -123,10 +125,10 @@ func (s *BookingService) ListAll() ([]models.Booking, error) {
 	return s.bookingRepo.ListAll()
 }
 
-func (s *BookingService) ListByCustomerID(customerID uint) ([]models.Booking, error) {
+func (s *BookingService) ListByCustomerID(customerID uuid.UUID) ([]models.Booking, error) {
 	return s.bookingRepo.ListByCustomerID(customerID)
 }
 
-func (s *BookingService) ListByProviderID(providerID uint) ([]models.Booking, error) {
+func (s *BookingService) ListByProviderID(providerID uuid.UUID) ([]models.Booking, error) {
 	return s.bookingRepo.ListByProviderID(providerID)
 }

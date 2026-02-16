@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ServiceHandler struct {
@@ -43,7 +43,7 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
-	userID, ok := userIDRaw.(uint)
+	userID, ok := userIDRaw.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
 		return
@@ -137,12 +137,12 @@ func (h *ServiceHandler) List(c *gin.Context) {
 
 func (h *ServiceHandler) Get(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-	service, err := h.service.Get(uint(id))
+	service, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
 		return
@@ -152,14 +152,14 @@ func (h *ServiceHandler) Get(c *gin.Context) {
 
 func (h *ServiceHandler) Update(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
 	// Ensure the service exists and capture ownership.
-	existing, err := h.service.Get(uint(id))
+	existing, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
 		return
@@ -170,7 +170,7 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
-	userID, ok := userIDRaw.(uint)
+	userID, ok := userIDRaw.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
 		return
@@ -237,12 +237,12 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.UpdateFields(uint(id), updates); err != nil {
+	if err := h.service.UpdateFields(id, updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update service"})
 		return
 	}
 
-	updated, err := h.service.Get(uint(id))
+	updated, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load updated service"})
 		return
@@ -252,13 +252,13 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 
 func (h *ServiceHandler) Delete(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	service, err := h.service.Get(uint(id))
+	service, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
 		return
@@ -269,7 +269,7 @@ func (h *ServiceHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
-	userID, ok := userIDRaw.(uint)
+	userID, ok := userIDRaw.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
 		return
@@ -282,7 +282,7 @@ func (h *ServiceHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Delete(uint(id)); err != nil {
+	if err := h.service.Delete(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete service"})
 		return
 	}

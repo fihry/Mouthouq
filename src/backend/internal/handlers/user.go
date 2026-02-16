@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"mouthouq/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type UserHandler struct {
@@ -34,16 +34,16 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 
 // Get user profile (either by ID param or from authenticated context)
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	var userID uint
+	var userID uuid.UUID
 
 	idParam := c.Param("id")
 	if idParam != "" {
-		id, err := strconv.Atoi(idParam)
+		id, err := uuid.Parse(idParam)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 			return
 		}
-		userID = uint(id)
+		userID = id
 	} else {
 		// Try to get from authenticated context
 		val, exists := c.Get("userId")
@@ -51,7 +51,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
-		id, ok := val.(uint)
+		id, ok := val.(uuid.UUID)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
 			return
@@ -69,23 +69,23 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 
 // Update user profile
 func (h *UserHandler) UpdateProfile(c *gin.Context) {
-	var userID uint
+	var userID uuid.UUID
 
 	idParam := c.Param("id")
 	if idParam != "" {
-		id, err := strconv.Atoi(idParam)
+		id, err := uuid.Parse(idParam)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 			return
 		}
-		userID = uint(id)
+		userID = id
 	} else {
 		val, exists := c.Get("userId")
 		if !exists {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
-		id, ok := val.(uint)
+		id, ok := val.(uuid.UUID)
 		if !ok {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
 			return
@@ -162,12 +162,12 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 // Delete user profile
 func (h *UserHandler) DeleteProfile(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
-	if err := h.service.Delete(uint(id)); err != nil {
+	if err := h.service.Delete(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete profile"})
 		return
 	}

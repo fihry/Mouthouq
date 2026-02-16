@@ -3,6 +3,7 @@ package repositories
 import (
 	"mouthouq/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -18,9 +19,9 @@ func (r *BookingRepository) Create(booking *models.Booking) error {
 	return r.db.Create(booking).Error
 }
 
-func (r *BookingRepository) FindByID(id uint) (*models.Booking, error) {
+func (r *BookingRepository) FindByID(id uuid.UUID) (*models.Booking, error) {
 	var booking models.Booking
-	if err := r.db.Preload("Service").Preload("Customer").First(&booking, id).Error; err != nil {
+	if err := r.db.Preload("Service").Preload("Customer").First(&booking, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &booking, nil
@@ -38,7 +39,7 @@ func (r *BookingRepository) ListAll() ([]models.Booking, error) {
 	return bookings, nil
 }
 
-func (r *BookingRepository) ListByCustomerID(customerID uint) ([]models.Booking, error) {
+func (r *BookingRepository) ListByCustomerID(customerID uuid.UUID) ([]models.Booking, error) {
 	var bookings []models.Booking
 	if err := r.db.Where("customer_id = ?", customerID).Preload("Service").Find(&bookings).Error; err != nil {
 		return nil, err
@@ -46,7 +47,7 @@ func (r *BookingRepository) ListByCustomerID(customerID uint) ([]models.Booking,
 	return bookings, nil
 }
 
-func (r *BookingRepository) ListByProviderID(providerID uint) ([]models.Booking, error) {
+func (r *BookingRepository) ListByProviderID(providerID uuid.UUID) ([]models.Booking, error) {
 	var bookings []models.Booking
 	if err := r.db.Joins("JOIN services ON services.id = bookings.service_id").
 		Where("services.provider_id = ?", providerID).
@@ -58,7 +59,7 @@ func (r *BookingRepository) ListByProviderID(providerID uint) ([]models.Booking,
 	return bookings, nil
 }
 
-func (r *BookingRepository) HasCompletedBooking(customerID, serviceID uint) (bool, error) {
+func (r *BookingRepository) HasCompletedBooking(customerID, serviceID uuid.UUID) (bool, error) {
 	var count int64
 	if err := r.db.Model(&models.Booking{}).
 		Where("customer_id = ? AND service_id = ? AND status = ?", customerID, serviceID, models.BookingCompleted).

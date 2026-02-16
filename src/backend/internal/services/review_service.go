@@ -5,6 +5,8 @@ import (
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
+
+	"github.com/google/uuid"
 )
 
 type ReviewService struct {
@@ -23,7 +25,7 @@ func NewReviewService(repo *repositories.ReviewRepository, serviceRepo *reposito
 	}
 }
 
-func (s *ReviewService) Create(serviceID, userID uint, rating float64, comment string) (*models.Review, error) {
+func (s *ReviewService) Create(serviceID, userID uuid.UUID, rating float64, comment string) (*models.Review, error) {
 	if _, err := s.serviceRepo.FindByID(serviceID); err != nil {
 		return nil, errors.New("service not found")
 	}
@@ -66,6 +68,6 @@ func (s *ReviewService) Create(serviceID, userID uint, rating float64, comment s
 	return review, nil
 }
 
-func (s *ReviewService) ListByServiceID(serviceID uint) ([]models.Review, error) {
+func (s *ReviewService) ListByServiceID(serviceID uuid.UUID) ([]models.Review, error) {
 	return s.repo.ListByServiceID(serviceID)
 }

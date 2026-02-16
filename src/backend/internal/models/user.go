@@ -28,7 +28,7 @@ const (
 )
 
 type User struct {
-	ID                 uint   `gorm:"primarykey"`
+	UUIDModel
 	Username           string `gorm:"unique;not null"`
 	FirstName          string
 	LastName           string

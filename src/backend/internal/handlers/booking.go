@@ -2,13 +2,13 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BookingHandler struct {
@@ -16,7 +16,7 @@ type BookingHandler struct {
 }
 
 type createBookingRequest struct {
-	ServiceID   uint      `json:"serviceId"`
+	ServiceID   uuid.UUID `json:"serviceId"`
 	ScheduledAt time.Time `json:"scheduledAt"`
 	Notes       string    `json:"notes"`
 }
@@ -47,7 +47,7 @@ func (h *BookingHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if req.ServiceID == 0 {
+	if req.ServiceID == uuid.Nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Service ID is required"})
 		return
 	}
@@ -118,13 +118,13 @@ func (h *BookingHandler) Get(c *gin.Context) {
 	}
 
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	booking, err := h.service.Get(uint(id))
+	booking, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
@@ -145,13 +145,13 @@ func (h *BookingHandler) Confirm(c *gin.Context) {
 	}
 
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	booking, err := h.service.Get(uint(id))
+	booking, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
@@ -176,12 +176,12 @@ func (h *BookingHandler) Confirm(c *gin.Context) {
 		}
 	}
 
-	if err := h.service.ConfirmBooking(uint(id)); err != nil {
+	if err := h.service.ConfirmBooking(id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updated, err := h.service.Get(uint(id))
+	updated, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load booking"})
 		return
@@ -196,13 +196,13 @@ func (h *BookingHandler) Complete(c *gin.Context) {
 	}
 
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	booking, err := h.service.Get(uint(id))
+	booking, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
@@ -227,12 +227,12 @@ func (h *BookingHandler) Complete(c *gin.Context) {
 		}
 	}
 
-	if err := h.service.CompleteBooking(uint(id)); err != nil {
+	if err := h.service.CompleteBooking(id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updated, err := h.service.Get(uint(id))
+	updated, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load booking"})
 		return
@@ -247,13 +247,13 @@ func (h *BookingHandler) Cancel(c *gin.Context) {
 	}
 
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
 
-	booking, err := h.service.Get(uint(id))
+	booking, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
 		return
@@ -265,12 +265,12 @@ func (h *BookingHandler) Cancel(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.CancelBooking(uint(id)); err != nil {
+	if err := h.service.CancelBooking(id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updated, err := h.service.Get(uint(id))
+	updated, err := h.service.Get(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load booking"})
 		return
@@ -278,16 +278,16 @@ func (h *BookingHandler) Cancel(c *gin.Context) {
 	c.JSON(http.StatusOK, updated)
 }
 
-func getUserID(c *gin.Context) (uint, bool) {
+func getUserID(c *gin.Context) (uuid.UUID, bool) {
 	userIDRaw, exists := c.Get("userId")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
-		return 0, false
+		return uuid.Nil, false
 	}
-	userID, ok := userIDRaw.(uint)
+	userID, ok := userIDRaw.(uuid.UUID)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
-		return 0, false
+		return uuid.Nil, false
 	}
 	return userID, true
 }
@@ -332,7 +332,7 @@ func getRoleValue(c *gin.Context) (string, bool) {
 	return role, true
 }
 
-func canAccessBooking(c *gin.Context, booking *models.Booking, userID uint) bool {
+func canAccessBooking(c *gin.Context, booking *models.Booking, userID uuid.UUID) bool {
 	role, ok := getRoleValue(c)
 	if ok && role == string(models.RoleAdmin) {
 		return true

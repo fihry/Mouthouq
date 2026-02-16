@@ -3,6 +3,7 @@ package repositories
 import (
 	"mouthouq/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +19,7 @@ func (r *TransactionRepository) Create(tx *models.Transaction) error {
 	return r.db.Create(tx).Error
 }
 
-func (r *TransactionRepository) FindByBookingID(bookingID uint) (*models.Transaction, error) {
+func (r *TransactionRepository) FindByBookingID(bookingID uuid.UUID) (*models.Transaction, error) {
 	var tx models.Transaction
 	if err := r.db.Where("booking_id = ?", bookingID).First(&tx).Error; err != nil {
 		return nil, err
@@ -26,6 +27,6 @@ func (r *TransactionRepository) FindByBookingID(bookingID uint) (*models.Transac
 	return &tx, nil
 }
 
-func (r *TransactionRepository) UpdateStatus(id uint, status models.TransactionStatus) error {
+func (r *TransactionRepository) UpdateStatus(id uuid.UUID, status models.TransactionStatus) error {
 	return r.db.Model(&models.Transaction{}).Where("id = ?", id).Update("status", status).Error
 }

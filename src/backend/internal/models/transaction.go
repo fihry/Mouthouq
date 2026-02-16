@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/google/uuid"
 )
 
 type BookingStatus string
@@ -16,9 +16,9 @@ const (
 )
 
 type Booking struct {
-	gorm.Model
-	ServiceID   uint          `gorm:"not null"`
-	CustomerID  uint          `gorm:"not null"`
+	UUIDModel
+	ServiceID   uuid.UUID     `gorm:"type:uuid;not null"`
+	CustomerID  uuid.UUID     `gorm:"type:uuid;not null"`
 	Status      BookingStatus `gorm:"type:string;default:'pending'"`
 	ScheduledAt time.Time     `gorm:"not null"`
 	Notes       string        `gorm:"type:text"`
@@ -38,8 +38,8 @@ const (
 )
 
 type Transaction struct {
-	gorm.Model
-	BookingID        uint              `gorm:"not null"`
+	UUIDModel
+	BookingID        uuid.UUID         `gorm:"type:uuid;not null"`
 	Amount           float64           `gorm:"type:decimal(10,2);not null"`
 	CommissionAmount float64           `gorm:"type:decimal(10,2);not null"`
 	Currency         string            `gorm:"default:'MAD'"`

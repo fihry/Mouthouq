@@ -6,6 +6,8 @@ import (
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
+
+	"github.com/google/uuid"
 )
 
 type SubscriptionService struct {
@@ -19,7 +21,7 @@ func NewSubscriptionService(userRepo *repositories.UserRepository) *Subscription
 }
 
 // SubscribeUser upgrades a user to a specific subscription plan.
-func (s *SubscriptionService) SubscribeUser(userID uint, plan models.SubscriptionPlan, durationDays int) error {
+func (s *SubscriptionService) SubscribeUser(userID uuid.UUID, plan models.SubscriptionPlan, durationDays int) error {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return err
@@ -50,7 +52,7 @@ func (s *SubscriptionService) IsSubscriptionActive(user *models.User) bool {
 }
 
 // CancelSubscription reverts a user to the 'none' plan.
-func (s *SubscriptionService) CancelSubscription(userID uint) error {
+func (s *SubscriptionService) CancelSubscription(userID uuid.UUID) error {
 	user, err := s.userRepo.FindByID(userID)
 	if err != nil {
 		return err

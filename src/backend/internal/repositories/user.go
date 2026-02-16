@@ -3,6 +3,7 @@ package repositories
 import (
 	"mouthouq/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -14,9 +15,9 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (r *UserRepository) FindByID(id uint) (*models.User, error) {
+func (r *UserRepository) FindByID(id uuid.UUID) (*models.User, error) {
 	var user models.User
-	err := r.db.First(&user, id).Error
+	err := r.db.First(&user, "id = ?", id).Error
 	return &user, err
 }
 
@@ -32,10 +33,10 @@ func (r *UserRepository) Update(user *models.User) error {
 	return r.db.Save(user).Error
 }
 
-func (r *UserRepository) UpdateFields(id uint, updates map[string]interface{}) error {
+func (r *UserRepository) UpdateFields(id uuid.UUID, updates map[string]interface{}) error {
 	return r.db.Model(&models.User{}).Where("id = ?", id).Updates(updates).Error
 }
 
-func (r *UserRepository) Delete(id uint) error {
-	return r.db.Delete(&models.User{}, id).Error
+func (r *UserRepository) Delete(id uuid.UUID) error {
+	return r.db.Delete(&models.User{}, "id = ?", id).Error
 }

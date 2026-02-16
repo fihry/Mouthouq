@@ -7,6 +7,7 @@ import (
 	"mouthouq/internal/utils/jwt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func AuthMiddleware(secret string) gin.HandlerFunc {
@@ -32,8 +33,15 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 			return
 		}
 
+		userID, err := uuid.Parse(claims.UserID)
+		if err != nil {
+			c.JSON(401, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
 		// Add user info to context
-		c.Set("userId", claims.UserID)
+		c.Set("userId", userID)
 		c.Set("role", claims.Role)
 		c.Set("userType", claims.UserType)
 		c.Next()

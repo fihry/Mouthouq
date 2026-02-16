@@ -3,6 +3,7 @@ package repositories
 import (
 	"mouthouq/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -30,9 +31,9 @@ func (r *ServiceRepository) ListPending() ([]models.Service, error) {
 	return services, err
 }
 
-func (r *ServiceRepository) FindByID(id uint) (*models.Service, error) {
+func (r *ServiceRepository) FindByID(id uuid.UUID) (*models.Service, error) {
 	var service models.Service
-	err := r.db.First(&service, id).Error
+	err := r.db.First(&service, "id = ?", id).Error
 	return &service, err
 }
 
@@ -40,11 +41,11 @@ func (r *ServiceRepository) Update(service *models.Service) error {
 	return r.db.Save(service).Error
 }
 
-func (r *ServiceRepository) UpdateFields(id uint, updates map[string]interface{}) error {
+func (r *ServiceRepository) UpdateFields(id uuid.UUID, updates map[string]interface{}) error {
 	return r.db.Model(&models.Service{}).Where("id = ?", id).Updates(updates).Error
 }
 
-func (r *ServiceRepository) UpdateRating(serviceID uint) error {
+func (r *ServiceRepository) UpdateRating(serviceID uuid.UUID) error {
 	var count int64
 	if err := r.db.Model(&models.Review{}).Where("service_id = ?", serviceID).Count(&count).Error; err != nil {
 		return err
@@ -61,6 +62,6 @@ func (r *ServiceRepository) UpdateRating(serviceID uint) error {
 	}).Error
 }
 
-func (r *ServiceRepository) Delete(id uint) error {
-	return r.db.Delete(&models.Service{}, id).Error
+func (r *ServiceRepository) Delete(id uuid.UUID) error {
+	return r.db.Delete(&models.Service{}, "id = ?", id).Error
 }

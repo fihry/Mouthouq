@@ -7,6 +7,7 @@ import (
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -36,7 +37,7 @@ func (s *AuthService) Register(user *models.User) error {
 
 	// Check if user exists
 	existing, _ := s.repo.GetUserByEmail(user.Email)
-	if existing.ID != 0 {
+	if existing.ID != uuid.Nil {
 		return errors.New("user already exists")
 	}
 	// Hash password

@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ReviewHandler struct {
@@ -15,9 +15,9 @@ type ReviewHandler struct {
 }
 
 type createReviewRequest struct {
-	ServiceID uint    `json:"serviceId"`
-	Rating    float64 `json:"rating"`
-	Comment   string  `json:"comment"`
+	ServiceID uuid.UUID `json:"serviceId"`
+	Rating    float64   `json:"rating"`
+	Comment   string    `json:"comment"`
 }
 
 func NewReviewHandler(service *services.ReviewService) *ReviewHandler {
@@ -46,7 +46,7 @@ func (h *ReviewHandler) Create(c *gin.Context) {
 		return
 	}
 
-	if req.ServiceID == 0 {
+	if req.ServiceID == uuid.Nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Service ID is required"})
 		return
 	}
@@ -67,13 +67,13 @@ func (h *ReviewHandler) Create(c *gin.Context) {
 
 func (h *ReviewHandler) ListByService(c *gin.Context) {
 	idParam := c.Param("serviceId")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service ID"})
 		return
 	}
 
-	reviews, err := h.service.ListByServiceID(uint(id))
+	reviews, err := h.service.ListByServiceID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch reviews"})
 		return

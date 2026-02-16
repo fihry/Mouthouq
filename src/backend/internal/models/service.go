@@ -1,13 +1,13 @@
 package models
 
 import (
-	"gorm.io/gorm"
+	"github.com/google/uuid"
 )
 
 type Service struct {
-	gorm.Model
-	ProviderID       uint   `gorm:"not null"`
-	Title            string `gorm:"not null"`
+	UUIDModel
+	ProviderID       uuid.UUID `gorm:"type:uuid;not null"`
+	Title            string    `gorm:"not null"`
 	Description      string
 	Category         ServiceCategory
 	PriceAmount      float64 `gorm:"type:decimal(10,2)"`

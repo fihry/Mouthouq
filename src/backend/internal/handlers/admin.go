@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type AdminHandler struct {
@@ -42,7 +42,7 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
 
 func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
@@ -59,12 +59,12 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
 		return
 	}
 
-	if err := h.users.UpdateFields(uint(id), map[string]interface{}{"role": req.Role}); err != nil {
+	if err := h.users.UpdateFields(id, map[string]interface{}{"role": req.Role}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
 		return
 	}
 
-	user, err := h.users.GetByID(uint(id))
+	user, err := h.users.GetByID(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load updated user"})
 		return
@@ -84,7 +84,7 @@ func (h *AdminHandler) ListPendingServices(c *gin.Context) {
 
 func (h *AdminHandler) VerifyService(c *gin.Context) {
 	idParam := c.Param("id")
-	id, err := strconv.Atoi(idParam)
+	id, err := uuid.Parse(idParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service ID"})
 		return
@@ -109,12 +109,12 @@ func (h *AdminHandler) VerifyService(c *gin.Context) {
 		return
 	}
 
-	if err := h.services.UpdateFields(uint(id), updates); err != nil {
+	if err := h.services.UpdateFields(id, updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update service"})
 		return
 	}
 
-	service, err := h.services.Get(uint(id))
+	service, err := h.services.Get(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load updated service"})
 		return
