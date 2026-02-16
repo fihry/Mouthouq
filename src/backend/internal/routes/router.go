@@ -40,6 +40,12 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 			auth.POST("/login", h.auth.Login)
 		}
 
+		servicesPublic := api.Group("/services")
+		{
+			servicesPublic.GET("", h.service.List)
+			servicesPublic.GET("/:id", h.service.Get)
+		}
+
 		// Protected routes
 		protected := api.Group("/")
 		protected.Use(middleware.AuthMiddleware(h.jwtSecret))
@@ -55,8 +61,6 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 			services := protected.Group("/services")
 			{
 				services.POST("", h.service.Create)
-				services.GET("", h.service.List)
-				services.GET("/:id", h.service.Get)
 				services.PUT("/:id", h.service.Update)
 				services.DELETE("/:id", h.service.Delete)
 			}

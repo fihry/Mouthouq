@@ -36,6 +36,10 @@ func (s *ServiceService) Update(service *models.Service) error {
 	return s.repo.Update(service)
 }
 
+func (s *ServiceService) UpdateFields(id uint, updates map[string]interface{}) error {
+	return s.repo.UpdateFields(id, updates)
+}
+
 func (s *ServiceService) Delete(id uint) error {
 	return s.repo.Delete(id)
 }

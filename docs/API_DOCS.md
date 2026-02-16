@@ -55,7 +55,8 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
     "user": {
       "id": 1,
       "email": "user@example.com",
-      "role": "user"
+      "role": "user",
+      "userType": "customer"
     }
   }
   ```
@@ -83,7 +84,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
   - **200 OK**: User updated successfully.
   - **400 Bad Request**: If required fields are invalid.
 
-## Services (Auth Required)
+## Services
 
 ### GET /services
 - **Description**: Get a list of all services.
@@ -96,6 +97,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
 ### POST /services
 - **Description**: Create a new service listing.
 - **Notes**: Intended for professional accounts (`userType: professional`).
+ - **Auth**: Required.
 - **Request Body**:
   ```json
   {
@@ -114,9 +116,11 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
 
 ### PUT /services/{id}
 - **Description**: Update a service listing.
+ - **Auth**: Required.
 
 ### DELETE /services/{id}
 - **Description**: Delete a service listing.
+ - **Auth**: Required.
 
 ## Error Codes
 

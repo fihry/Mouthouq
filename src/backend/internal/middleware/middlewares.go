@@ -33,6 +33,7 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 		// Add user info to context
 		c.Set("userId", claims.UserID)
 		c.Set("role", claims.Role)
+		c.Set("userType", claims.UserType)
 		c.Next()
 	}
 }

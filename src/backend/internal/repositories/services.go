@@ -34,6 +34,10 @@ func (r *ServiceRepository) Update(service *models.Service) error {
 	return r.db.Save(service).Error
 }
 
+func (r *ServiceRepository) UpdateFields(id uint, updates map[string]interface{}) error {
+	return r.db.Model(&models.Service{}).Where("id = ?", id).Updates(updates).Error
+}
+
 func (r *ServiceRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Service{}, id).Error
 }

@@ -14,6 +14,21 @@ type ServiceHandler struct {
 	service *services.ServiceService
 }
 
+type updateServiceRequest struct {
+	Title         *string   `json:"title"`
+	Description   *string   `json:"description"`
+	Category      *string   `json:"category"`
+	PriceAmount   *float64  `json:"priceAmount"`
+	PriceCurrency *string   `json:"priceCurrency"`
+	PriceUnit     *string   `json:"priceUnit"`
+	City          *string   `json:"city"`
+	Latitude      *float64  `json:"latitude"`
+	Longitude     *float64  `json:"longitude"`
+	Images        *[]string `json:"images"`
+	Tags          *[]string `json:"tags"`
+	IsActive      *bool     `json:"isActive"`
+}
+
 func NewServiceHandler(service *services.ServiceService) *ServiceHandler {
 	return &ServiceHandler{
 		service: service,
@@ -22,16 +37,32 @@ func NewServiceHandler(service *services.ServiceService) *ServiceHandler {
 
 func (h *ServiceHandler) Create(c *gin.Context) {
 	// Check if user is authenticated
-	userID, exists := c.Get("userID")
+	userIDRaw, exists := c.Get("userId")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
+	userID, ok := userIDRaw.(uint)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
+		return
+	}
 
-	// Check if user is a professional
-	userRole, roleExists := c.Get("userRole")
-	if !roleExists || userRole != "professional" {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Only professionals can create services"})
+	// Check if user is a professional or company
+	userTypeRaw, typeExists := c.Get("userType")
+	if !typeExists {
+		c.JSON(http.StatusForbidden, gin.H{"error": "User type is required"})
+		return
+	}
+
+	userType, ok := userTypeRaw.(string)
+	if !ok {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid user type"})
+		return
+	}
+
+	if userType != string(models.TypeProfessional) && userType != string(models.TypeCompany) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only professional or company accounts can create services"})
 		return
 	}
 
@@ -48,7 +79,7 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 	}
 
 	// Set provider ID from authenticated user
-	service.ProviderID = userID.(uint)
+	service.ProviderID = userID
 
 	// New services start as inactive and unverified (pending admin approval)
 	service.IsActive = false
@@ -97,17 +128,107 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
-	var service models.Service
-	if err := c.ShouldBindJSON(&service); err != nil {
+
+	// Ensure the service exists and capture ownership.
+	existing, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
+		return
+	}
+
+	userIDRaw, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+		return
+	}
+	userID, ok := userIDRaw.(uint)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
+		return
+	}
+
+	roleRaw, _ := c.Get("role")
+	role, _ := roleRaw.(string)
+	if role != string(models.RoleAdmin) && existing.ProviderID != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to update this service"})
+		return
+	}
+
+	var req updateServiceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
-	service.ID = uint(id)
-	if err := h.service.Update(&service); err != nil {
+
+	updates := map[string]interface{}{}
+
+	if req.Title != nil {
+		if *req.Title == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Title cannot be empty"})
+			return
+		}
+		updates["title"] = *req.Title
+	}
+	if req.Description != nil {
+		updates["description"] = *req.Description
+	}
+	if req.Category != nil {
+		if !models.IsValidCategory(*req.Category) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category. Please choose from supported categories."})
+			return
+		}
+		updates["category"] = *req.Category
+	}
+	if req.PriceAmount != nil {
+		updates["price_amount"] = *req.PriceAmount
+	}
+	if req.PriceCurrency != nil {
+		updates["price_currency"] = *req.PriceCurrency
+	}
+	if req.PriceUnit != nil {
+		switch *req.PriceUnit {
+		case "hour", "job", "day":
+			updates["price_unit"] = *req.PriceUnit
+		default:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price unit. Use hour, job, or day."})
+			return
+		}
+	}
+	if req.City != nil {
+		updates["city"] = *req.City
+	}
+	if req.Latitude != nil {
+		updates["latitude"] = *req.Latitude
+	}
+	if req.Longitude != nil {
+		updates["longitude"] = *req.Longitude
+	}
+	if req.Images != nil {
+		updates["images"] = *req.Images
+	}
+	if req.Tags != nil {
+		updates["tags"] = *req.Tags
+	}
+	if req.IsActive != nil {
+		updates["is_active"] = *req.IsActive
+	}
+
+	if len(updates) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No fields to update"})
+		return
+	}
+
+	if err := h.service.UpdateFields(uint(id), updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update service"})
 		return
 	}
-	c.JSON(http.StatusOK, service)
+
+	updated, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load updated service"})
+		return
+	}
+	c.JSON(http.StatusOK, updated)
 }
 
 func (h *ServiceHandler) Delete(c *gin.Context) {

@@ -21,6 +21,10 @@ func (s *UserService) Update(user *models.User) error {
 	return s.repo.Update(user)
 }
 
+func (s *UserService) UpdateFields(id uint, updates map[string]interface{}) error {
+	return s.repo.UpdateFields(id, updates)
+}
+
 func (s *UserService) Delete(id uint) error {
 	return s.repo.Delete(id)
 }
