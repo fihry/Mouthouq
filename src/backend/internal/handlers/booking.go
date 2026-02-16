@@ -72,6 +72,20 @@ func (h *BookingHandler) List(c *gin.Context) {
 		return
 	}
 
+	role, ok := getUserRole(c)
+	if !ok {
+		return
+	}
+	if role == string(models.RoleAdmin) {
+		bookings, err := h.service.ListAll()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch bookings"})
+			return
+		}
+		c.JSON(http.StatusOK, bookings)
+		return
+	}
+
 	userType, ok := getUserType(c)
 	if !ok {
 		return
@@ -124,6 +138,146 @@ func (h *BookingHandler) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, booking)
 }
 
+func (h *BookingHandler) Confirm(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
+
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	booking, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+		return
+	}
+
+	role, ok := getUserRole(c)
+	if !ok {
+		return
+	}
+	if role != string(models.RoleAdmin) {
+		userType, ok := getUserType(c)
+		if !ok {
+			return
+		}
+		if userType != string(models.TypeProfessional) && userType != string(models.TypeCompany) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Only professionals can confirm bookings"})
+			return
+		}
+		if booking.Service.ProviderID != userID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to confirm this booking"})
+			return
+		}
+	}
+
+	if err := h.service.ConfirmBooking(uint(id)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updated, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load booking"})
+		return
+	}
+	c.JSON(http.StatusOK, updated)
+}
+
+func (h *BookingHandler) Complete(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
+
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	booking, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+		return
+	}
+
+	role, ok := getUserRole(c)
+	if !ok {
+		return
+	}
+	if role != string(models.RoleAdmin) {
+		userType, ok := getUserType(c)
+		if !ok {
+			return
+		}
+		if userType != string(models.TypeProfessional) && userType != string(models.TypeCompany) {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Only professionals can complete bookings"})
+			return
+		}
+		if booking.Service.ProviderID != userID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to complete this booking"})
+			return
+		}
+	}
+
+	if err := h.service.CompleteBooking(uint(id)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updated, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load booking"})
+		return
+	}
+	c.JSON(http.StatusOK, updated)
+}
+
+func (h *BookingHandler) Cancel(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		return
+	}
+
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	booking, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Booking not found"})
+		return
+	}
+
+	role, _ := getRoleValue(c)
+	if role != string(models.RoleAdmin) && booking.CustomerID != userID && booking.Service.ProviderID != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to cancel this booking"})
+		return
+	}
+
+	if err := h.service.CancelBooking(uint(id)); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updated, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load booking"})
+		return
+	}
+	c.JSON(http.StatusOK, updated)
+}
+
 func getUserID(c *gin.Context) (uint, bool) {
 	userIDRaw, exists := c.Get("userId")
 	if !exists {
@@ -152,10 +306,35 @@ func getUserType(c *gin.Context) (string, bool) {
 	return userType, true
 }
 
+func getUserRole(c *gin.Context) (string, bool) {
+	roleRaw, exists := c.Get("role")
+	if !exists {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Role is required"})
+		return "", false
+	}
+	role, ok := roleRaw.(string)
+	if !ok {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid role"})
+		return "", false
+	}
+	return role, true
+}
+
+func getRoleValue(c *gin.Context) (string, bool) {
+	roleRaw, exists := c.Get("role")
+	if !exists {
+		return "", false
+	}
+	role, ok := roleRaw.(string)
+	if !ok {
+		return "", false
+	}
+	return role, true
+}
+
 func canAccessBooking(c *gin.Context, booking *models.Booking, userID uint) bool {
-	roleRaw, _ := c.Get("role")
-	role, _ := roleRaw.(string)
-	if role == string(models.RoleAdmin) {
+	role, ok := getRoleValue(c)
+	if ok && role == string(models.RoleAdmin) {
 		return true
 	}
 

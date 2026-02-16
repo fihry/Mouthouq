@@ -86,8 +86,41 @@ func (s *BookingService) CompleteBooking(bookingID uint) error {
 	return s.bookingRepo.Update(booking)
 }
 
+func (s *BookingService) ConfirmBooking(bookingID uint) error {
+	booking, err := s.bookingRepo.FindByID(bookingID)
+	if err != nil {
+		return err
+	}
+
+	if booking.Status != models.BookingPending {
+		return errors.New("only pending bookings can be confirmed")
+	}
+
+	booking.Status = models.BookingConfirmed
+	return s.bookingRepo.Update(booking)
+}
+
+func (s *BookingService) CancelBooking(bookingID uint) error {
+	booking, err := s.bookingRepo.FindByID(bookingID)
+	if err != nil {
+		return err
+	}
+
+	switch booking.Status {
+	case models.BookingPending, models.BookingConfirmed:
+		booking.Status = models.BookingCancelled
+		return s.bookingRepo.Update(booking)
+	default:
+		return errors.New("only pending or confirmed bookings can be cancelled")
+	}
+}
+
 func (s *BookingService) Get(id uint) (*models.Booking, error) {
 	return s.bookingRepo.FindByID(id)
+}
+
+func (s *BookingService) ListAll() ([]models.Booking, error) {
+	return s.bookingRepo.ListAll()
 }
 
 func (s *BookingService) ListByCustomerID(customerID uint) ([]models.Booking, error) {

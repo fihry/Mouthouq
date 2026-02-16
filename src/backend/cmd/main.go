@@ -53,7 +53,7 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	aiService := services.NewAIService()
 	serviceService := services.NewServiceService(serviceRepo, aiService)
 	bookingService := services.NewBookingService(bookingRepo, serviceRepo, transactionRepo)
-	reviewService := services.NewReviewService(reviewRepo, serviceRepo, aiService)
+	reviewService := services.NewReviewService(reviewRepo, serviceRepo, bookingRepo, aiService)
 
 	// Initialize Handlers
 	authHandler := handlers.NewAuthHandler(authService, cfg.Security.JWTSecret, cfg.Security.TokenExpiration)

@@ -80,6 +80,9 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 				bookings.POST("", h.bookings.Create)
 				bookings.GET("", h.bookings.List)
 				bookings.GET("/:id", h.bookings.Get)
+				bookings.PATCH("/:id/confirm", h.bookings.Confirm)
+				bookings.PATCH("/:id/complete", h.bookings.Complete)
+				bookings.PATCH("/:id/cancel", h.bookings.Cancel)
 			}
 
 			// Review routes

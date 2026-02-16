@@ -25,3 +25,13 @@ func (r *ReviewRepository) ListByServiceID(serviceID uint) ([]models.Review, err
 	}
 	return reviews, nil
 }
+
+func (r *ReviewRepository) ExistsByServiceAndUser(serviceID, userID uint) (bool, error) {
+	var count int64
+	if err := r.db.Model(&models.Review{}).
+		Where("service_id = ? AND user_id = ?", serviceID, userID).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
