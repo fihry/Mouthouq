@@ -9,7 +9,6 @@ import (
 	"mouthouq/internal/repositories"
 	"mouthouq/internal/routes"
 	"mouthouq/internal/services"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -46,6 +45,7 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	bookingRepo := repositories.NewBookingRepository(db)
 	transactionRepo := repositories.NewTransactionRepository(db)
 	reviewRepo := repositories.NewReviewRepository(db)
+	verificationRepo := repositories.NewVerificationRepository(db)
 
 	// Initialize Services
 	authService := services.NewAuthService(authRepo)
@@ -54,6 +54,7 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	serviceService := services.NewServiceService(serviceRepo, aiService)
 	bookingService := services.NewBookingService(bookingRepo, serviceRepo, transactionRepo)
 	reviewService := services.NewReviewService(reviewRepo, serviceRepo, bookingRepo, aiService)
+	verificationService := services.NewVerificationService(verificationRepo, userRepo)
 
 	// Initialize Handlers
 	authHandler := handlers.NewAuthHandler(authService, cfg.Security.JWTSecret, cfg.Security.TokenExpiration)
@@ -62,9 +63,10 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	bookingHandler := handlers.NewBookingHandler(bookingService)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 	adminHandler := handlers.NewAdminHandler(userService, serviceService)
+	verificationHandler := handlers.NewVerificationHandler(verificationService)
 
 	// Create routes Handlers container
-	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, bookingHandler, reviewHandler, adminHandler, cfg.Security.JWTSecret)
+	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, bookingHandler, reviewHandler, adminHandler, verificationHandler, cfg.Security.JWTSecret)
 
 	// Setup routes
 	routes.SetupRoutes(r, h)

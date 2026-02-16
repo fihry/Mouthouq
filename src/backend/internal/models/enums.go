@@ -72,6 +72,15 @@ func IsValidTransactionStatus(status TransactionStatus) bool {
 	}
 }
 
+func IsValidVerificationDocumentType(docType VerificationDocumentType) bool {
+	switch docType {
+	case DocumentTypeIDCard, DocumentTypePassport, DocumentTypeLicense, DocumentTypeBusinessRegistration, DocumentTypeCertificate:
+		return true
+	default:
+		return false
+	}
+}
+
 func IsValidPriceUnit(unit PriceUnit) bool {
 	switch unit {
 	case PriceUnitHour, PriceUnitJob, PriceUnitDay:
@@ -156,6 +165,19 @@ func (s *TransactionStatus) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("invalid transaction status")
 	}
 	*s = status
+	return nil
+}
+
+func (d *VerificationDocumentType) UnmarshalJSON(data []byte) error {
+	value, err := parseEnumValue(data)
+	if err != nil {
+		return err
+	}
+	docType := VerificationDocumentType(value)
+	if !IsValidVerificationDocumentType(docType) {
+		return fmt.Errorf("invalid verification document type")
+	}
+	*d = docType
 	return nil
 }
 

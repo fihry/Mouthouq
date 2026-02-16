@@ -16,10 +16,11 @@ type Handlers struct {
 	bookings  *handlers.BookingHandler
 	reviews   *handlers.ReviewHandler
 	admin     *handlers.AdminHandler
+	verify    *handlers.VerificationHandler
 	jwtSecret string
 }
 
-func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, bookings *handlers.BookingHandler, reviews *handlers.ReviewHandler, admin *handlers.AdminHandler, jwtSecret string) *Handlers {
+func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, bookings *handlers.BookingHandler, reviews *handlers.ReviewHandler, admin *handlers.AdminHandler, verify *handlers.VerificationHandler, jwtSecret string) *Handlers {
 	return &Handlers{
 		db:        db,
 		auth:      auth,
@@ -28,6 +29,7 @@ func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHa
 		bookings:  bookings,
 		reviews:   reviews,
 		admin:     admin,
+		verify:    verify,
 		jwtSecret: jwtSecret,
 	}
 }
@@ -92,6 +94,14 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 			{
 				reviews.POST("", h.reviews.Create)
 			}
+
+			// Provider verification routes
+			verification := protected.Group("/providers/verification")
+			{
+				verification.POST("", h.verify.Submit)
+				verification.GET("", h.verify.GetStatus)
+			}
+
 		}
 
 		admin := api.Group("/admin")
@@ -101,6 +111,8 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 			admin.PATCH("/users/:id/role", h.admin.UpdateUserRole)
 			admin.GET("/services/pending", h.admin.ListPendingServices)
 			admin.PATCH("/services/:id/verify", h.admin.VerifyService)
+			admin.GET("/providers/verification/pending", h.verify.ListPending)
+			admin.PATCH("/providers/verification/:id", h.verify.Review)
 		}
 	}
 }
