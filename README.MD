@@ -88,14 +88,18 @@ Internal documentation is available in the `docs` folder:
 ## Testing
 
 ```bash
-# Backend tests
-cd src/backend
-go test ./...
+# Backend tests (with DB-backed handler tests)
+make test-backend
+
+# Backend tests (no TEST_DB_DSN; DB-backed tests will skip)
+make test-backend-nodb
 
 # Frontend tests
 cd src/frontend
 npm test
 ```
+
+`make test-backend` reads DB vars from `.env`, builds `TEST_DB_DSN`, and auto-creates the test database if it does not exist.
 
 ## Deployment
 

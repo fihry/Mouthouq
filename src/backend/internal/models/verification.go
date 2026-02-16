@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type VerificationDocumentType string
@@ -18,13 +19,13 @@ const (
 
 type ProviderVerification struct {
 	UUIDModel
-	UserID        uuid.UUID               `gorm:"type:uuid;not null;uniqueIndex"`
-	DocumentType  VerificationDocumentType `gorm:"type:string;not null"`
-	DocumentURLs  []string                `gorm:"type:text[]"`
-	Status        VerificationStatus      `gorm:"type:string;default:'pending'"`
-	Notes         string                  `gorm:"type:text"`
-	ReviewedBy    *uuid.UUID              `gorm:"type:uuid"`
-	ReviewedAt    *time.Time
-	ReviewNotes   string `gorm:"type:text"`
-	User          User   `gorm:"foreignKey:UserID"`
+	UserID       uuid.UUID                `gorm:"type:uuid;not null;uniqueIndex"`
+	DocumentType VerificationDocumentType `gorm:"type:string;not null"`
+	DocumentURLs pq.StringArray           `gorm:"type:text[]"`
+	Status       VerificationStatus       `gorm:"type:string;default:'pending'"`
+	Notes        string                   `gorm:"type:text"`
+	ReviewedBy   *uuid.UUID               `gorm:"type:uuid"`
+	ReviewedAt   *time.Time
+	ReviewNotes  string `gorm:"type:text"`
+	User         User   `gorm:"foreignKey:UserID"`
 }

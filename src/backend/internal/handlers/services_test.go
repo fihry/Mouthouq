@@ -8,6 +8,8 @@ import (
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
 	"mouthouq/internal/testutil"
+
+	"github.com/lib/pq"
 )
 
 func TestServiceCreateRequiresImage(t *testing.T) {
@@ -50,7 +52,7 @@ func TestServiceListFilters(t *testing.T) {
 			PriceCurrency: "MAD",
 			PriceUnit:     models.PriceUnitJob,
 			City:          "Rabat",
-			Images:        []string{"http://example.com/plumbing.jpg"},
+			Images:        pq.StringArray{"http://example.com/plumbing.jpg"},
 			IsActive:      true,
 			IsVerified:    true,
 		},
@@ -63,7 +65,7 @@ func TestServiceListFilters(t *testing.T) {
 			PriceCurrency: "MAD",
 			PriceUnit:     models.PriceUnitJob,
 			City:          "Rabat",
-			Images:        []string{"http://example.com/clean.jpg"},
+			Images:        pq.StringArray{"http://example.com/clean.jpg"},
 			IsActive:      true,
 			IsVerified:    true,
 		},

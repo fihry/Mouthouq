@@ -5,6 +5,7 @@ import (
 	"mouthouq/internal/repositories"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type ServiceService struct {
@@ -21,7 +22,7 @@ func (s *ServiceService) Create(service *models.Service) error {
 	score, isVerified, tags := s.ai.AnalyzeService(service.Title, service.Description)
 	service.TrustScore = score
 	service.IsVerified = isVerified
-	service.Tags = tags
+	service.Tags = pq.StringArray(tags)
 
 	return s.repo.Create(service)
 }

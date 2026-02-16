@@ -1,10 +1,19 @@
-.PHONY: help env-check db-up db-down db-logs db-shell minio-up minio-down minio-logs run-backend run-frontend build clean status compose-up compose-down compose-logs compose-restart
+.PHONY: help env-check db-up db-down db-logs db-shell minio-up minio-down minio-logs run-backend run-frontend build clean status compose-up compose-down compose-logs compose-restart test-backend test-backend-nodb
 
 # Load environment variables
 ifneq (,$(wildcard ./.env))
     include .env
     export
 endif
+
+# Test database defaults
+TEST_DB_HOST ?= $(DB_HOST)
+TEST_DB_PORT ?= $(DB_PORT)
+TEST_DB_USER ?= $(DB_USER)
+TEST_DB_PASSWORD ?= $(DB_PASSWORD)
+TEST_DB_NAME ?= mouthouq_test
+TEST_DB_SSLMODE ?= disable
+TEST_DB_DSN ?= postgres://$(TEST_DB_USER):$(TEST_DB_PASSWORD)@$(TEST_DB_HOST):$(TEST_DB_PORT)/$(TEST_DB_NAME)?sslmode=$(TEST_DB_SSLMODE)
 
 # --------------------------
 # Help
@@ -28,6 +37,8 @@ help:
 	@echo "    make run-frontend - Run Next.js frontend locally"
 	@echo "    make build        - Build backend binary"
 	@echo "    make clean        - Remove build artifacts and caches"
+	@echo "    make test-backend - Run backend tests with TEST_DB_DSN and -count=1"
+	@echo "    make test-backend-nodb - Run backend tests without DB DSN"
 	@echo ""
 	@echo "  Docker Compose Stack:"
 	@echo "    make compose-up      - Start all containers"
@@ -117,6 +128,12 @@ clean:
 	rm -rf bin/
 	cd src/backend && go clean
 	cd src/frontend && rm -rf .next
+
+test-backend:
+	cd src/backend && TEST_DB_DSN='$(TEST_DB_DSN)' go test ./... -count=1
+
+test-backend-nodb:
+	cd src/backend && TEST_DB_DSN='' go test ./...
 
 # --------------------------
 # Status

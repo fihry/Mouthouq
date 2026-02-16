@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type Service struct {
@@ -14,14 +15,14 @@ type Service struct {
 	PriceCurrency    string
 	PriceUnit        PriceUnit `gorm:"check:price_unit IN ('hour', 'job', 'day')"`
 	City             string
-	Latitude         float64  `gorm:"type:decimal(10,8)"`
-	Longitude        float64  `gorm:"type:decimal(11,8)"`
-	Images           []string `gorm:"type:text[]"`
-	Tags             []string `gorm:"type:text[]"`
-	IsActive         bool     `gorm:"default:true"`
-	IsVerified       bool     `gorm:"default:false"`
-	TrustScore       float64  `gorm:"default:0"`
-	ResponseTimeMins int      `gorm:"default:0"`
+	Latitude         float64        `gorm:"type:decimal(10,8)"`
+	Longitude        float64        `gorm:"type:decimal(11,8)"`
+	Images           pq.StringArray `gorm:"type:text[]"`
+	Tags             pq.StringArray `gorm:"type:text[]"`
+	IsActive         bool           `gorm:"default:true"`
+	IsVerified       bool           `gorm:"default:false"`
+	TrustScore       float64        `gorm:"default:0"`
+	ResponseTimeMins int            `gorm:"default:0"`
 	RatingAverage    float64
 	RatingCount      int `gorm:"default:0"`
 }

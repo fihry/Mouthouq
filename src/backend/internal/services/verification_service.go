@@ -8,6 +8,7 @@ import (
 	"mouthouq/internal/repositories"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type VerificationService struct {
@@ -33,7 +34,7 @@ func (s *VerificationService) Submit(userID uuid.UUID, docType models.Verificati
 	verification := &models.ProviderVerification{
 		UserID:       userID,
 		DocumentType: docType,
-		DocumentURLs: docURLs,
+		DocumentURLs: pq.StringArray(docURLs),
 		Status:       models.StatusPending,
 		Notes:        notes,
 		ReviewedBy:   nil,

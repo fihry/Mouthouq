@@ -9,6 +9,8 @@ import (
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
 	"mouthouq/internal/testutil"
+
+	"github.com/lib/pq"
 )
 
 func TestBookingLifecycleAndReview(t *testing.T) {
@@ -28,7 +30,7 @@ func TestBookingLifecycleAndReview(t *testing.T) {
 		PriceCurrency: "MAD",
 		PriceUnit:     models.PriceUnitJob,
 		City:          "Rabat",
-		Images:        []string{"http://example.com/handyman.jpg"},
+		Images:        pq.StringArray{"http://example.com/handyman.jpg"},
 		IsActive:      true,
 		IsVerified:    true,
 	}

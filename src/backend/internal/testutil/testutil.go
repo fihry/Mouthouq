@@ -1,7 +1,10 @@
 package testutil
 
 import (
+	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -27,6 +30,10 @@ func OpenTestDB(t *testing.T) *gorm.DB {
 		t.Skip("TEST_DB_DSN not set; skipping database tests")
 	}
 
+	if err := ensureDatabaseExists(dsn); err != nil {
+		t.Fatalf("failed to ensure test database: %v", err)
+	}
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("failed to connect to test database: %v", err)
@@ -37,6 +44,43 @@ func OpenTestDB(t *testing.T) *gorm.DB {
 	}
 
 	return db
+}
+
+func ensureDatabaseExists(dsn string) error {
+	parsed, err := url.Parse(dsn)
+	if err != nil {
+		return fmt.Errorf("invalid TEST_DB_DSN format: %w", err)
+	}
+
+	dbName := strings.TrimPrefix(parsed.Path, "/")
+	if dbName == "" {
+		return fmt.Errorf("database name is missing in TEST_DB_DSN")
+	}
+
+	adminURL := *parsed
+	adminURL.Path = "/postgres"
+
+	adminDB, err := gorm.Open(postgres.Open(adminURL.String()), &gorm.Config{})
+	if err != nil {
+		return err
+	}
+
+	sqlDB, err := adminDB.DB()
+	if err == nil {
+		defer sqlDB.Close()
+	}
+
+	var exists bool
+	if err := adminDB.Raw("SELECT EXISTS(SELECT 1 FROM pg_database WHERE datname = ?)", dbName).Scan(&exists).Error; err != nil {
+		return err
+	}
+
+	if exists {
+		return nil
+	}
+
+	escapedName := strings.ReplaceAll(dbName, `"`, `""`)
+	return adminDB.Exec(fmt.Sprintf(`CREATE DATABASE "%s"`, escapedName)).Error
 }
 
 func resetDB(db *gorm.DB) error {

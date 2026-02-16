@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type ServiceHandler struct {
@@ -338,10 +339,10 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Service images cannot be empty"})
 			return
 		}
-		updates["images"] = *req.Images
+		updates["images"] = pq.StringArray(*req.Images)
 	}
 	if req.Tags != nil {
-		updates["tags"] = *req.Tags
+		updates["tags"] = pq.StringArray(*req.Tags)
 	}
 	if req.IsActive != nil {
 		updates["is_active"] = *req.IsActive
