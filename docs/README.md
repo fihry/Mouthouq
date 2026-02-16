@@ -16,6 +16,9 @@ Our platform connects users with trusted professionals for household services li
 - **Service Listings**: Professionals can create services; users can browse available services.
 - **User Registration & Authentication**: JWT-based registration and login.
 - **User Profiles**: Profile retrieval and updates for authenticated users.
+- **Bookings & Reviews**: Booking flow with confirmations and customer reviews.
+- **Provider Verification**: Upload documents and track verification status.
+- **Media Uploads**: Upload service images and verification documents via MinIO.
 
 ## Planned Features
 

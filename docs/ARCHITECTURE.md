@@ -17,7 +17,7 @@
 ## Database & Data Management
 - PostgreSQL - Primary relational database.
 - Redis - Optional cache (configured, not yet used).
-- MinIO - Optional object storage (configured, not yet used).
+- MinIO - Object storage for media uploads.
 
 ## Authentication & Security
 - JWT (current).

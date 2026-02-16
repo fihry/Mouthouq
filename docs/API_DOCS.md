@@ -89,8 +89,30 @@ All resource IDs are UUID strings.
 ## Services
 
 ### GET /services
-- **Description**: Get a list of all services.
-- **Response**: Array of service objects.
+- **Description**: Get a list of active, verified services.
+- **Query Params**:
+  - `page` (default: 1)
+  - `limit` (default: 20, max: 100)
+  - `q` (search in title/description)
+  - `category`
+  - `city`
+  - `minPrice`
+  - `maxPrice`
+  - `priceUnit`
+  - `providerId`
+  - `sort` (`newest`, `oldest`, `price_asc`, `price_desc`, `rating_desc`)
+- **Response**:
+  ```json
+  {
+    "data": [],
+    "meta": {
+      "page": 1,
+      "limit": 20,
+      "total": 0,
+      "totalPages": 0
+    }
+  }
+  ```
 
 ### GET /services/{id}
 - **Description**: Retrieve a service by ID.
@@ -110,9 +132,11 @@ All resource IDs are UUID strings.
     "priceCurrency": "MAD",
     "priceUnit": "job",
     "category": "Electrical",
-    "city": "Marrakech"
+    "city": "Marrakech",
+    "images": ["https://storage.example.com/bucket/uploads/service-image/abc.jpg"]
   }
   ```
+- **Notes**: At least one `images` entry is required.
 - **Notes**: `category` must be one of: Plumbing, Electrical, Electrical Work, Cleaning, House Cleaning, Painting, Carpentry, HVAC, AC Repair, Landscaping, Moving, Pest Control, Appliance Repair, Handyman.
 - **Response**:
   - **201 Created**: Service created successfully.
@@ -205,6 +229,55 @@ All resource IDs are UUID strings.
   {
     "isVerified": true,
     "isActive": true
+  }
+  ```
+
+## Uploads (Auth Required)
+
+### POST /uploads
+- **Description**: Upload a media file and receive a URL/objectKey.
+- **Request**: `multipart/form-data`
+  - `file` (required)
+  - `purpose` (required) one of `service-image`, `provider-doc`, `profile-image`
+- **Notes**:
+  - `service-image` and `profile-image` allow `image/jpeg`, `image/png`, `image/webp`.
+  - `provider-doc` allows `image/jpeg`, `image/png`, `application/pdf`.
+  - Max file size: 10 MB.
+- **Response**:
+  ```json
+  {
+    "objectKey": "uploads/service-image/uuid.jpg",
+    "url": "http://localhost:9000/mouthouq/uploads/service-image/uuid.jpg"
+  }
+  ```
+
+## Provider Verification (Auth Required)
+
+### POST /providers/verification
+- **Description**: Submit provider verification documents (professionals/companies only).
+- **Request Body**:
+  ```json
+  {
+    "documentType": "id_card",
+    "documentUrls": ["http://.../uploads/provider-doc/uuid.png"],
+    "notes": "Optional note for reviewers."
+  }
+  ```
+- **Notes**: `documentType` must be one of `id_card`, `passport`, `license`, `business_registration`, `certificate`.
+
+### GET /providers/verification
+- **Description**: Get the current user's verification status and submission.
+
+### GET /admin/providers/verification/pending
+- **Description**: List all pending provider verification requests.
+
+### PATCH /admin/providers/verification/{id}
+- **Description**: Review a provider verification request.
+- **Request Body**:
+  ```json
+  {
+    "status": "verified",
+    "reviewNotes": "Approved."
   }
   ```
 

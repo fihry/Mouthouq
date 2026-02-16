@@ -10,4 +10,4 @@ flowchart TD
     API -. optional .-> MinIO[(MinIO Object Storage)]
 ```
 
-Note: Redis and MinIO are configured in docker-compose but not yet wired in the application.
+Note: Redis is configured in docker-compose but not yet wired in the application.
