@@ -3,14 +3,15 @@ package main
 import (
 	"log"
 
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"mouthouq/internal/config"
 	"mouthouq/internal/database"
 	"mouthouq/internal/handlers"
 	"mouthouq/internal/repositories"
 	"mouthouq/internal/routes"
 	"mouthouq/internal/services"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"mouthouq/internal/storage"
 )
 
 func main() {
@@ -64,9 +65,25 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	reviewHandler := handlers.NewReviewHandler(reviewService)
 	adminHandler := handlers.NewAdminHandler(userService, serviceService)
 	verificationHandler := handlers.NewVerificationHandler(verificationService)
+	var uploader *storage.MinioUploader
+	if cfg.MinIO.Endpoint != "" {
+		var err error
+		uploader, err = storage.NewMinioUploader(
+			cfg.MinIO.Endpoint,
+			cfg.MinIO.AccessKey,
+			cfg.MinIO.SecretKey,
+			cfg.MinIO.Bucket,
+			cfg.MinIO.UseSSL,
+			cfg.MinIO.PublicURL,
+		)
+		if err != nil {
+			log.Printf("MinIO uploader disabled: %v", err)
+		}
+	}
+	uploadHandler := handlers.NewUploadHandler(uploader)
 
 	// Create routes Handlers container
-	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, bookingHandler, reviewHandler, adminHandler, verificationHandler, cfg.Security.JWTSecret)
+	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, bookingHandler, reviewHandler, adminHandler, uploadHandler, verificationHandler, cfg.Security.JWTSecret)
 
 	// Setup routes
 	routes.SetupRoutes(r, h)

@@ -16,11 +16,12 @@ type Handlers struct {
 	bookings  *handlers.BookingHandler
 	reviews   *handlers.ReviewHandler
 	admin     *handlers.AdminHandler
+	uploads   *handlers.UploadHandler
 	verify    *handlers.VerificationHandler
 	jwtSecret string
 }
 
-func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, bookings *handlers.BookingHandler, reviews *handlers.ReviewHandler, admin *handlers.AdminHandler, verify *handlers.VerificationHandler, jwtSecret string) *Handlers {
+func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, bookings *handlers.BookingHandler, reviews *handlers.ReviewHandler, admin *handlers.AdminHandler, uploads *handlers.UploadHandler, verify *handlers.VerificationHandler, jwtSecret string) *Handlers {
 	return &Handlers{
 		db:        db,
 		auth:      auth,
@@ -29,6 +30,7 @@ func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHa
 		bookings:  bookings,
 		reviews:   reviews,
 		admin:     admin,
+		uploads:   uploads,
 		verify:    verify,
 		jwtSecret: jwtSecret,
 	}
@@ -100,6 +102,12 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 			{
 				verification.POST("", h.verify.Submit)
 				verification.GET("", h.verify.GetStatus)
+			}
+
+			// Upload routes
+			uploads := protected.Group("/uploads")
+			{
+				uploads.POST("", h.uploads.Upload)
 			}
 
 		}

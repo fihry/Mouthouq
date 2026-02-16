@@ -29,6 +29,8 @@ type Config struct {
 		AccessKey string `yaml:"accessKey"`
 		SecretKey string `yaml:"secretKey"`
 		UseSSL    bool   `yaml:"useSSL"`
+		Bucket    string `yaml:"bucket"`
+		PublicURL string `yaml:"publicURL"`
 	} `yaml:"minio"`
 
 	Redis struct {
