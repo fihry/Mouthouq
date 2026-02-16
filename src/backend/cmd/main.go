@@ -72,7 +72,12 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 			cfg.MinIO.Endpoint,
 			cfg.MinIO.AccessKey,
 			cfg.MinIO.SecretKey,
-			cfg.MinIO.Bucket,
+			storage.BucketConfig{
+				Images:    cfg.MinIO.Buckets.Images,
+				Documents: cfg.MinIO.Buckets.Documents,
+				Videos:    cfg.MinIO.Buckets.Videos,
+				Audio:     cfg.MinIO.Buckets.Audio,
+			},
 			cfg.MinIO.UseSSL,
 			cfg.MinIO.PublicURL,
 		)

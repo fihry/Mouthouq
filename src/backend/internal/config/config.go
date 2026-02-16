@@ -29,8 +29,13 @@ type Config struct {
 		AccessKey string `yaml:"accessKey"`
 		SecretKey string `yaml:"secretKey"`
 		UseSSL    bool   `yaml:"useSSL"`
-		Bucket    string `yaml:"bucket"`
 		PublicURL string `yaml:"publicURL"`
+		Buckets   struct {
+			Images    string `yaml:"images"`
+			Documents string `yaml:"documents"`
+			Videos    string `yaml:"videos"`
+			Audio     string `yaml:"audio"`
+		} `yaml:"buckets"`
 	} `yaml:"minio"`
 
 	Redis struct {

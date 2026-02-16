@@ -15,10 +15,56 @@ import (
 
 const maxUploadSizeBytes = 10 << 20 // 10 MB
 
-var allowedUploadPurposes = map[string]struct{}{
-	"service-image": {},
-	"provider-doc":  {},
-	"profile-image": {},
+type uploadRule struct {
+	mediaType       string
+	allowedByMIME   map[string]map[string]struct{}
+	providerOnlyUse bool
+}
+
+var uploadRules = map[string]uploadRule{
+	"service-image": {
+		mediaType: storage.MediaTypeImages,
+		allowedByMIME: map[string]map[string]struct{}{
+			"image/jpeg": {".jpg": {}, ".jpeg": {}},
+			"image/png":  {".png": {}},
+			"image/webp": {".webp": {}},
+		},
+	},
+	"profile-image": {
+		mediaType: storage.MediaTypeImages,
+		allowedByMIME: map[string]map[string]struct{}{
+			"image/jpeg": {".jpg": {}, ".jpeg": {}},
+			"image/png":  {".png": {}},
+			"image/webp": {".webp": {}},
+		},
+	},
+	"provider-doc": {
+		mediaType:       storage.MediaTypeDocuments,
+		providerOnlyUse: true,
+		allowedByMIME: map[string]map[string]struct{}{
+			"image/jpeg":      {".jpg": {}, ".jpeg": {}},
+			"image/png":       {".png": {}},
+			"application/pdf": {".pdf": {}},
+		},
+	},
+	"service-video": {
+		mediaType: storage.MediaTypeVideos,
+		allowedByMIME: map[string]map[string]struct{}{
+			"video/mp4":       {".mp4": {}},
+			"video/webm":      {".webm": {}},
+			"video/quicktime": {".mov": {}},
+		},
+	},
+	"service-audio": {
+		mediaType: storage.MediaTypeAudio,
+		allowedByMIME: map[string]map[string]struct{}{
+			"audio/mpeg": {".mp3": {}},
+			"audio/mp4":  {".m4a": {}},
+			"audio/wav":  {".wav": {}},
+			"audio/wave": {".wav": {}},
+			"audio/ogg":  {".ogg": {}},
+		},
+	},
 }
 
 type UploadHandler struct {
@@ -50,14 +96,15 @@ func (h *UploadHandler) Upload(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "purpose is required"})
 		return
 	}
-	if _, ok := allowedUploadPurposes[purpose]; !ok {
+	rule, ok := uploadRules[purpose]
+	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid upload purpose"})
 		return
 	}
 
 	userTypeRaw, _ := c.Get("userType")
 	userType, _ := userTypeRaw.(string)
-	if purpose == "provider-doc" && userType != string(models.TypeProfessional) && userType != string(models.TypeCompany) {
+	if rule.providerOnlyUse && userType != string(models.TypeProfessional) && userType != string(models.TypeCompany) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Only providers can upload verification documents"})
 		return
 	}
@@ -88,15 +135,15 @@ func (h *UploadHandler) Upload(c *gin.Context) {
 		return
 	}
 
-	if !isAllowedContentType(purpose, contentType) {
+	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+	if !isAllowedFile(rule, contentType, ext) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported file type"})
 		return
 	}
 
-	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 	objectKey := buildObjectKey(purpose, ext)
 
-	result, err := h.uploader.Upload(c.Request.Context(), objectKey, file, fileHeader.Size, contentType)
+	result, err := h.uploader.Upload(c.Request.Context(), rule.mediaType, objectKey, file, fileHeader.Size, normalizeContentType(contentType))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload file"})
 		return
@@ -105,15 +152,21 @@ func (h *UploadHandler) Upload(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-func isAllowedContentType(purpose, contentType string) bool {
-	switch purpose {
-	case "service-image", "profile-image":
-		return contentType == "image/jpeg" || contentType == "image/png" || contentType == "image/webp"
-	case "provider-doc":
-		return contentType == "image/jpeg" || contentType == "image/png" || contentType == "application/pdf"
-	default:
+func isAllowedFile(rule uploadRule, contentType, ext string) bool {
+	if ext == "" {
 		return false
 	}
+	mime := normalizeContentType(contentType)
+	allowedExts, ok := rule.allowedByMIME[mime]
+	if !ok {
+		return false
+	}
+	_, ok = allowedExts[strings.ToLower(ext)]
+	return ok
+}
+
+func normalizeContentType(contentType string) string {
+	return strings.ToLower(strings.TrimSpace(strings.Split(contentType, ";")[0]))
 }
 
 func buildObjectKey(purpose, ext string) string {

@@ -33,8 +33,12 @@ minio:
   accessKey: ${MINIO_ACCESS_KEY}
   secretKey: ${MINIO_SECRET_KEY}
   useSSL: ${MINIO_USE_SSL}
-  bucket: ${MINIO_BUCKET}
   publicURL: ${MINIO_PUBLIC_URL}
+  buckets:
+    images: ${MINIO_BUCKET_IMAGES}
+    documents: ${MINIO_BUCKET_DOCUMENTS}
+    videos: ${MINIO_BUCKET_VIDEOS}
+    audio: ${MINIO_BUCKET_AUDIO}
 # Redis configuration
 redis:
   host: ${REDIS_HOST}

@@ -238,16 +238,33 @@ All resource IDs are UUID strings.
 - **Description**: Upload a media file and receive a URL/objectKey.
 - **Request**: `multipart/form-data`
   - `file` (required)
-  - `purpose` (required) one of `service-image`, `provider-doc`, `profile-image`
+  - `purpose` (required) one of `service-image`, `profile-image`, `provider-doc`, `service-video`, `service-audio`
 - **Notes**:
-  - `service-image` and `profile-image` allow `image/jpeg`, `image/png`, `image/webp`.
-  - `provider-doc` allows `image/jpeg`, `image/png`, `application/pdf`.
+  - `service-image` and `profile-image` are stored in the images bucket and allow:
+    - `image/jpeg` (`.jpg`, `.jpeg`)
+    - `image/png` (`.png`)
+    - `image/webp` (`.webp`)
+  - `provider-doc` is stored in the documents bucket and allows:
+    - `application/pdf` (`.pdf`)
+    - `image/jpeg` (`.jpg`, `.jpeg`)
+    - `image/png` (`.png`)
+  - `service-video` is stored in the videos bucket and allows:
+    - `video/mp4` (`.mp4`)
+    - `video/webm` (`.webm`)
+    - `video/quicktime` (`.mov`)
+  - `service-audio` is stored in the audio bucket and allows:
+    - `audio/mpeg` (`.mp3`)
+    - `audio/mp4` (`.m4a`)
+    - `audio/wav` or `audio/wave` (`.wav`)
+    - `audio/ogg` (`.ogg`)
+  - MIME type and file extension must match the same allowed format.
   - Max file size: 10 MB.
 - **Response**:
   ```json
   {
+    "bucket": "mouthouq-images",
     "objectKey": "uploads/service-image/uuid.jpg",
-    "url": "http://localhost:9000/mouthouq/uploads/service-image/uuid.jpg"
+    "url": "http://localhost:9000/mouthouq-images/uploads/service-image/uuid.jpg"
   }
   ```
 
