@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"mouthouq/internal/models"
@@ -17,6 +18,18 @@ type AuthHandler struct {
 	jwtDuration time.Duration
 }
 
+type registerRequest struct {
+	Username    string `json:"username"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	PhoneNumber string `json:"phoneNumber"`
+	City        string `json:"city"`
+	Address     string `json:"address"`
+	UserType    string `json:"userType"`
+}
+
 func NewAuthHandler(service *services.AuthService, jwtSecret string, expiration string) *AuthHandler {
 	duration, err := time.ParseDuration(expiration + "h")
 	if err != nil {
@@ -30,11 +43,43 @@ func NewAuthHandler(service *services.AuthService, jwtSecret string, expiration 
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
+	var req registerRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
+
+	if strings.TrimSpace(req.Username) == "" ||
+		strings.TrimSpace(req.FirstName) == "" ||
+		strings.TrimSpace(req.LastName) == "" ||
+		strings.TrimSpace(req.Email) == "" ||
+		strings.TrimSpace(req.Password) == "" ||
+		strings.TrimSpace(req.PhoneNumber) == "" ||
+		strings.TrimSpace(req.City) == "" ||
+		strings.TrimSpace(req.UserType) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required fields"})
+		return
+	}
+
+	userType := models.UserType(req.UserType)
+	if userType != models.TypeCustomer && userType != models.TypeProfessional && userType != models.TypeCompany {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user type"})
+		return
+	}
+
+	user := models.User{
+		Username:    req.Username,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Email:       req.Email,
+		Password:    req.Password,
+		PhoneNumber: req.PhoneNumber,
+		City:        req.City,
+		Address:     req.Address,
+		UserType:    userType,
+		Role:        models.RoleUser,
+	}
+
 	if err := h.service.Register(&user); err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Registration failed. Please check your details."})
 		return
@@ -67,9 +112,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"message": "Login successful",
 		"token":   token,
 		"user": gin.H{
-			"id":    user.ID,
-			"email": user.Email,
-			"role":  user.Role,
+			"id":       user.ID,
+			"email":    user.Email,
+			"role":     user.Role,
 			"userType": user.UserType,
 		},
 	})

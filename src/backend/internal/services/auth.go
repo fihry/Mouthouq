@@ -2,6 +2,8 @@ package services
 
 import (
 	"errors"
+	"strings"
+
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
 
@@ -17,6 +19,21 @@ func NewAuthService(repo *repositories.AuthRepository) *AuthService {
 }
 
 func (s *AuthService) Register(user *models.User) error {
+	if strings.TrimSpace(user.Username) == "" ||
+		strings.TrimSpace(user.FirstName) == "" ||
+		strings.TrimSpace(user.LastName) == "" ||
+		strings.TrimSpace(user.Email) == "" ||
+		strings.TrimSpace(user.Password) == "" ||
+		strings.TrimSpace(user.PhoneNumber) == "" ||
+		strings.TrimSpace(user.City) == "" ||
+		strings.TrimSpace(string(user.UserType)) == "" {
+		return errors.New("missing required fields")
+	}
+
+	if !isValidUserType(user.UserType) {
+		return errors.New("invalid user type")
+	}
+
 	// Check if user exists
 	existing, _ := s.repo.GetUserByEmail(user.Email)
 	if existing.ID != 0 {
@@ -28,20 +45,6 @@ func (s *AuthService) Register(user *models.User) error {
 		return err
 	}
 	user.Password = string(hashed)
-
-	// Set username if empty
-	if user.Username == "" {
-		user.Username = user.Email
-	}
-
-	// Map UserType from role if not already set
-	if user.UserType == "" {
-		if user.Role == "professional" {
-			user.UserType = models.TypeProfessional
-		} else {
-			user.UserType = models.TypeCustomer
-		}
-	}
 
 	return s.repo.CreateUser(user)
 }
@@ -55,4 +58,13 @@ func (s *AuthService) Login(email, password string) (*models.User, error) {
 		return nil, errors.New("invalid credentials")
 	}
 	return user, nil
+}
+
+func isValidUserType(userType models.UserType) bool {
+	switch userType {
+	case models.TypeCustomer, models.TypeProfessional, models.TypeCompany:
+		return true
+	default:
+		return false
+	}
 }
