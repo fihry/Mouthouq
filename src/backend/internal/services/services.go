@@ -26,8 +26,8 @@ func (s *ServiceService) Create(service *models.Service) error {
 	return s.repo.Create(service)
 }
 
-func (s *ServiceService) List() ([]models.Service, error) {
-	return s.repo.List()
+func (s *ServiceService) List(filters models.ServiceFilters, limit, offset int, order string) ([]models.Service, int64, error) {
+	return s.repo.ListWithFilters(filters, limit, offset, order)
 }
 
 func (s *ServiceService) ListPending() ([]models.Service, error) {

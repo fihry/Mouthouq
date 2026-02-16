@@ -19,10 +19,57 @@ func (r *ServiceRepository) Create(service *models.Service) error {
 	return r.db.Create(service).Error
 }
 
-func (r *ServiceRepository) List() ([]models.Service, error) {
+func (r *ServiceRepository) ListWithFilters(filters models.ServiceFilters, limit, offset int, order string) ([]models.Service, int64, error) {
+	query := r.db.Model(&models.Service{})
+
+	if filters.IsActive != nil {
+		query = query.Where("is_active = ?", *filters.IsActive)
+	}
+	if filters.IsVerified != nil {
+		query = query.Where("is_verified = ?", *filters.IsVerified)
+	}
+	if filters.Category != "" {
+		query = query.Where("category = ?", filters.Category)
+	}
+	if filters.City != "" {
+		query = query.Where("city ILIKE ?", filters.City)
+	}
+	if filters.MinPrice != nil {
+		query = query.Where("price_amount >= ?", *filters.MinPrice)
+	}
+	if filters.MaxPrice != nil {
+		query = query.Where("price_amount <= ?", *filters.MaxPrice)
+	}
+	if filters.PriceUnit != "" {
+		query = query.Where("price_unit = ?", filters.PriceUnit)
+	}
+	if filters.ProviderID != nil {
+		query = query.Where("provider_id = ?", *filters.ProviderID)
+	}
+	if filters.Query != "" {
+		like := "%" + filters.Query + "%"
+		query = query.Where("title ILIKE ? OR description ILIKE ?", like, like)
+	}
+
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if order != "" {
+		query = query.Order(order)
+	}
+
+	if limit > 0 {
+		query = query.Limit(limit).Offset(offset)
+	}
+
 	var services []models.Service
-	err := r.db.Find(&services).Error
-	return services, err
+	if err := query.Find(&services).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return services, total, nil
 }
 
 func (r *ServiceRepository) ListPending() ([]models.Service, error) {

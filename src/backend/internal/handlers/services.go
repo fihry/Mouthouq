@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"mouthouq/internal/models"
@@ -89,6 +91,11 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 		return
 	}
 
+	if len(service.Images) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "At least one service image is required"})
+		return
+	}
+
 	if service.PriceAmount <= 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Price amount must be greater than zero"})
 		return
@@ -127,12 +134,116 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 }
 
 func (h *ServiceHandler) List(c *gin.Context) {
-	services, err := h.service.List()
+	page := 1
+	limit := 20
+	if pageParam := c.Query("page"); pageParam != "" {
+		value, err := strconv.Atoi(pageParam)
+		if err != nil || value < 1 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page"})
+			return
+		}
+		page = value
+	}
+	if limitParam := c.Query("limit"); limitParam != "" {
+		value, err := strconv.Atoi(limitParam)
+		if err != nil || value < 1 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit"})
+			return
+		}
+		if value > 100 {
+			value = 100
+		}
+		limit = value
+	}
+
+	filters := models.ServiceFilters{
+		Query: strings.TrimSpace(c.Query("q")),
+		City:  strings.TrimSpace(c.Query("city")),
+	}
+
+	if categoryParam := strings.TrimSpace(c.Query("category")); categoryParam != "" {
+		category := models.ServiceCategory(categoryParam)
+		if !models.IsValidCategory(category) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category"})
+			return
+		}
+		filters.Category = category
+	}
+
+	if unitParam := strings.TrimSpace(c.Query("priceUnit")); unitParam != "" {
+		unit := models.PriceUnit(unitParam)
+		if !models.IsValidPriceUnit(unit) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price unit"})
+			return
+		}
+		filters.PriceUnit = unit
+	}
+
+	if minPriceParam := strings.TrimSpace(c.Query("minPrice")); minPriceParam != "" {
+		value, err := strconv.ParseFloat(minPriceParam, 64)
+		if err != nil || value < 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid minPrice"})
+			return
+		}
+		filters.MinPrice = &value
+	}
+	if maxPriceParam := strings.TrimSpace(c.Query("maxPrice")); maxPriceParam != "" {
+		value, err := strconv.ParseFloat(maxPriceParam, 64)
+		if err != nil || value < 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid maxPrice"})
+			return
+		}
+		filters.MaxPrice = &value
+	}
+
+	if providerParam := strings.TrimSpace(c.Query("providerId")); providerParam != "" {
+		value, err := uuid.Parse(providerParam)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid providerId"})
+			return
+		}
+		filters.ProviderID = &value
+	}
+
+	isActive := true
+	isVerified := true
+	filters.IsActive = &isActive
+	filters.IsVerified = &isVerified
+
+	order := "created_at desc"
+	switch strings.TrimSpace(c.Query("sort")) {
+	case "price_asc":
+		order = "price_amount asc"
+	case "price_desc":
+		order = "price_amount desc"
+	case "rating_desc":
+		order = "rating_average desc"
+	case "oldest":
+		order = "created_at asc"
+	case "", "newest":
+		order = "created_at desc"
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sort"})
+		return
+	}
+
+	offset := (page - 1) * limit
+	services, total, err := h.service.List(filters, limit, offset, order)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch services"})
 		return
 	}
-	c.JSON(http.StatusOK, services)
+
+	totalPages := int(math.Ceil(float64(total) / float64(limit)))
+	c.JSON(http.StatusOK, gin.H{
+		"data": services,
+		"meta": gin.H{
+			"page":       page,
+			"limit":      limit,
+			"total":      total,
+			"totalPages": totalPages,
+		},
+	})
 }
 
 func (h *ServiceHandler) Get(c *gin.Context) {
@@ -223,6 +334,10 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 		updates["longitude"] = *req.Longitude
 	}
 	if req.Images != nil {
+		if len(*req.Images) == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Service images cannot be empty"})
+			return
+		}
 		updates["images"] = *req.Images
 	}
 	if req.Tags != nil {
