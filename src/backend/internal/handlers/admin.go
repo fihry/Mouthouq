@@ -16,7 +16,7 @@ type AdminHandler struct {
 }
 
 type updateUserRoleRequest struct {
-	Role string `json:"role"`
+	Role models.UserRole `json:"role"`
 }
 
 type verifyServiceRequest struct {
@@ -54,13 +54,12 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
 		return
 	}
 
-	role := models.UserRole(req.Role)
-	if role != models.RoleUser && role != models.RoleAdmin {
+	if !models.IsValidUserRole(req.Role) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role"})
 		return
 	}
 
-	if err := h.users.UpdateFields(uint(id), map[string]interface{}{"role": role}); err != nil {
+	if err := h.users.UpdateFields(uint(id), map[string]interface{}{"role": req.Role}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
 		return
 	}

@@ -34,6 +34,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
     "userType": "customer"
   }
   ```
+- **Notes**: `userType` must be one of `customer`, `professional`, `company`.
 - **Response**:
   - **201 Created**: User created successfully.
   - **409 Conflict**: User already exists.
@@ -97,6 +98,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
 ### POST /services
 - **Description**: Create a new service listing.
 - **Notes**: Intended for professional accounts (`userType: professional`).
+- **Notes**: `priceUnit` must be one of `hour`, `job`, `day`.
 - **Auth**: Required.
 - **Request Body**:
   ```json
@@ -110,6 +112,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
     "city": "Marrakech"
   }
   ```
+- **Notes**: `category` must be one of: Plumbing, Electrical, Electrical Work, Cleaning, House Cleaning, Painting, Carpentry, HVAC, AC Repair, Landscaping, Moving, Pest Control, Appliance Repair, Handyman.
 - **Response**:
   - **201 Created**: Service created successfully.
   - **400 Bad Request**: If required fields are missing or invalid.
@@ -189,6 +192,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
     "role": "admin"
   }
   ```
+- **Notes**: `role` must be one of `user`, `admin`.
 
 ### GET /admin/services/pending
 - **Description**: List services pending verification or activation.

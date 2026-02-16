@@ -30,7 +30,7 @@ func (s *AuthService) Register(user *models.User) error {
 		return errors.New("missing required fields")
 	}
 
-	if !isValidUserType(user.UserType) {
+	if !models.IsValidUserType(user.UserType) {
 		return errors.New("invalid user type")
 	}
 
@@ -58,13 +58,4 @@ func (s *AuthService) Login(email, password string) (*models.User, error) {
 		return nil, errors.New("invalid credentials")
 	}
 	return user, nil
-}
-
-func isValidUserType(userType models.UserType) bool {
-	switch userType {
-	case models.TypeCustomer, models.TypeProfessional, models.TypeCompany:
-		return true
-	default:
-		return false
-	}
 }

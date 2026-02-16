@@ -19,15 +19,15 @@ type AuthHandler struct {
 }
 
 type registerRequest struct {
-	Username    string `json:"username"`
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	PhoneNumber string `json:"phoneNumber"`
-	City        string `json:"city"`
-	Address     string `json:"address"`
-	UserType    string `json:"userType"`
+	Username    string          `json:"username"`
+	FirstName   string          `json:"firstName"`
+	LastName    string          `json:"lastName"`
+	Email       string          `json:"email"`
+	Password    string          `json:"password"`
+	PhoneNumber string          `json:"phoneNumber"`
+	City        string          `json:"city"`
+	Address     string          `json:"address"`
+	UserType    models.UserType `json:"userType"`
 }
 
 func NewAuthHandler(service *services.AuthService, jwtSecret string, expiration string) *AuthHandler {
@@ -56,13 +56,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		strings.TrimSpace(req.Password) == "" ||
 		strings.TrimSpace(req.PhoneNumber) == "" ||
 		strings.TrimSpace(req.City) == "" ||
-		strings.TrimSpace(req.UserType) == "" {
+		req.UserType == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required fields"})
 		return
 	}
 
-	userType := models.UserType(req.UserType)
-	if userType != models.TypeCustomer && userType != models.TypeProfessional && userType != models.TypeCompany {
+	if !models.IsValidUserType(req.UserType) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user type"})
 		return
 	}
@@ -76,7 +75,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		PhoneNumber: req.PhoneNumber,
 		City:        req.City,
 		Address:     req.Address,
-		UserType:    userType,
+		UserType:    req.UserType,
 		Role:        models.RoleUser,
 	}
 

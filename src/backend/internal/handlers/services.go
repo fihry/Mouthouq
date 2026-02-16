@@ -16,18 +16,18 @@ type ServiceHandler struct {
 }
 
 type updateServiceRequest struct {
-	Title         *string   `json:"title"`
-	Description   *string   `json:"description"`
-	Category      *string   `json:"category"`
-	PriceAmount   *float64  `json:"priceAmount"`
-	PriceCurrency *string   `json:"priceCurrency"`
-	PriceUnit     *string   `json:"priceUnit"`
-	City          *string   `json:"city"`
-	Latitude      *float64  `json:"latitude"`
-	Longitude     *float64  `json:"longitude"`
-	Images        *[]string `json:"images"`
-	Tags          *[]string `json:"tags"`
-	IsActive      *bool     `json:"isActive"`
+	Title         *string                 `json:"title"`
+	Description   *string                 `json:"description"`
+	Category      *models.ServiceCategory `json:"category"`
+	PriceAmount   *float64                `json:"priceAmount"`
+	PriceCurrency *string                 `json:"priceCurrency"`
+	PriceUnit     *models.PriceUnit       `json:"priceUnit"`
+	City          *string                 `json:"city"`
+	Latitude      *float64                `json:"latitude"`
+	Longitude     *float64                `json:"longitude"`
+	Images        *[]string               `json:"images"`
+	Tags          *[]string               `json:"tags"`
+	IsActive      *bool                   `json:"isActive"`
 }
 
 func NewServiceHandler(service *services.ServiceService) *ServiceHandler {
@@ -78,6 +78,11 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 		return
 	}
 
+	if service.Category == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Category is required"})
+		return
+	}
+
 	// Validate category
 	if !models.IsValidCategory(service.Category) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category. Please choose from supported categories."})
@@ -90,13 +95,10 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 	}
 
 	if service.PriceUnit == "" {
-		service.PriceUnit = "job"
+		service.PriceUnit = models.PriceUnitJob
 	}
 
-	switch service.PriceUnit {
-	case "hour", "job", "day":
-		// allowed
-	default:
+	if !models.IsValidPriceUnit(service.PriceUnit) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price unit. Use hour, job, or day."})
 		return
 	}
@@ -200,10 +202,6 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 		updates["description"] = *req.Description
 	}
 	if req.Category != nil {
-		if !models.IsValidCategory(*req.Category) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category. Please choose from supported categories."})
-			return
-		}
 		updates["category"] = *req.Category
 	}
 	if req.PriceAmount != nil {
@@ -213,13 +211,7 @@ func (h *ServiceHandler) Update(c *gin.Context) {
 		updates["price_currency"] = *req.PriceCurrency
 	}
 	if req.PriceUnit != nil {
-		switch *req.PriceUnit {
-		case "hour", "job", "day":
-			updates["price_unit"] = *req.PriceUnit
-		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price unit. Use hour, job, or day."})
-			return
-		}
+		updates["price_unit"] = *req.PriceUnit
 	}
 	if req.City != nil {
 		updates["city"] = *req.City
