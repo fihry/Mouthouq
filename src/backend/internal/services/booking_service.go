@@ -85,3 +85,15 @@ func (s *BookingService) CompleteBooking(bookingID uint) error {
 	booking.Status = models.BookingCompleted
 	return s.bookingRepo.Update(booking)
 }
+
+func (s *BookingService) Get(id uint) (*models.Booking, error) {
+	return s.bookingRepo.FindByID(id)
+}
+
+func (s *BookingService) ListByCustomerID(customerID uint) ([]models.Booking, error) {
+	return s.bookingRepo.ListByCustomerID(customerID)
+}
+
+func (s *BookingService) ListByProviderID(providerID uint) ([]models.Booking, error) {
+	return s.bookingRepo.ListByProviderID(providerID)
+}

@@ -37,3 +37,15 @@ func (r *BookingRepository) ListByCustomerID(customerID uint) ([]models.Booking,
 	}
 	return bookings, nil
 }
+
+func (r *BookingRepository) ListByProviderID(providerID uint) ([]models.Booking, error) {
+	var bookings []models.Booking
+	if err := r.db.Joins("JOIN services ON services.id = bookings.service_id").
+		Where("services.provider_id = ?", providerID).
+		Preload("Service").
+		Preload("Customer").
+		Find(&bookings).Error; err != nil {
+		return nil, err
+	}
+	return bookings, nil
+}

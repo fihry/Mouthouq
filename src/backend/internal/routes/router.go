@@ -13,22 +13,26 @@ type Handlers struct {
 	auth      *handlers.AuthHandler
 	users     *handlers.UserHandler
 	service   *handlers.ServiceHandler
+	bookings  *handlers.BookingHandler
+	reviews   *handlers.ReviewHandler
 	jwtSecret string
 }
 
-func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, jwtSecret string) *Handlers {
+func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, bookings *handlers.BookingHandler, reviews *handlers.ReviewHandler, jwtSecret string) *Handlers {
 	return &Handlers{
 		db:        db,
 		auth:      auth,
 		users:     users,
 		service:   service,
+		bookings:  bookings,
+		reviews:   reviews,
 		jwtSecret: jwtSecret,
 	}
 }
 
 func SetupRoutes(r *gin.Engine, h *Handlers) {
 	// Health check
-	r.GET("/health", h.HealthCheck)
+	r.GET("api/v1/health", h.HealthCheck)
 
 	// API routes
 	api := r.Group("/api/v1")
@@ -44,6 +48,11 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 		{
 			servicesPublic.GET("", h.service.List)
 			servicesPublic.GET("/:id", h.service.Get)
+		}
+
+		reviewsPublic := api.Group("/reviews")
+		{
+			reviewsPublic.GET("/:serviceId", h.reviews.ListByService)
 		}
 
 		// Protected routes
@@ -64,13 +73,27 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 				services.PUT("/:id", h.service.Update)
 				services.DELETE("/:id", h.service.Delete)
 			}
+
+			// Booking routes
+			bookings := protected.Group("/bookings")
+			{
+				bookings.POST("", h.bookings.Create)
+				bookings.GET("", h.bookings.List)
+				bookings.GET("/:id", h.bookings.Get)
+			}
+
+			// Review routes
+			reviews := protected.Group("/reviews")
+			{
+				reviews.POST("", h.reviews.Create)
+			}
 		}
 	}
 }
 
 func (h *Handlers) HealthCheck(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"status": "ok",
-		"db":     h.db.Name(),
+		"status":  "OK",
+		"message": "the api is healthy",
 	})
 }

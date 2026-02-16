@@ -43,20 +43,27 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	authRepo := repositories.NewAuthRepository(db)
 	userRepo := repositories.NewUserRepository(db)
 	serviceRepo := repositories.NewServiceRepository(db)
+	bookingRepo := repositories.NewBookingRepository(db)
+	transactionRepo := repositories.NewTransactionRepository(db)
+	reviewRepo := repositories.NewReviewRepository(db)
 
 	// Initialize Services
 	authService := services.NewAuthService(authRepo)
 	userService := services.NewUserService(userRepo)
 	aiService := services.NewAIService()
 	serviceService := services.NewServiceService(serviceRepo, aiService)
+	bookingService := services.NewBookingService(bookingRepo, serviceRepo, transactionRepo)
+	reviewService := services.NewReviewService(reviewRepo, serviceRepo, aiService)
 
 	// Initialize Handlers
 	authHandler := handlers.NewAuthHandler(authService, cfg.Security.JWTSecret, cfg.Security.TokenExpiration)
 	userHandler := handlers.NewUserHandler(userService)
 	serviceHandler := handlers.NewServiceHandler(serviceService)
+	bookingHandler := handlers.NewBookingHandler(bookingService)
+	reviewHandler := handlers.NewReviewHandler(reviewService)
 
 	// Create routes Handlers container
-	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, cfg.Security.JWTSecret)
+	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, bookingHandler, reviewHandler, cfg.Security.JWTSecret)
 
 	// Setup routes
 	routes.SetupRoutes(r, h)
