@@ -20,6 +20,14 @@ func (r *UserRepository) FindByID(id uint) (*models.User, error) {
 	return &user, err
 }
 
+func (r *UserRepository) List() ([]models.User, error) {
+	var users []models.User
+	if err := r.db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (r *UserRepository) Update(user *models.User) error {
 	return r.db.Save(user).Error
 }

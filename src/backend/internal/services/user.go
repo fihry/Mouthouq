@@ -17,6 +17,10 @@ func (s *UserService) GetByID(id uint) (*models.User, error) {
 	return s.repo.FindByID(id)
 }
 
+func (s *UserService) List() ([]models.User, error) {
+	return s.repo.List()
+}
+
 func (s *UserService) Update(user *models.User) error {
 	return s.repo.Update(user)
 }

@@ -24,6 +24,12 @@ func (r *ServiceRepository) List() ([]models.Service, error) {
 	return services, err
 }
 
+func (r *ServiceRepository) ListPending() ([]models.Service, error) {
+	var services []models.Service
+	err := r.db.Where("is_verified = ? OR is_active = ?", false, false).Find(&services).Error
+	return services, err
+}
+
 func (r *ServiceRepository) FindByID(id uint) (*models.Service, error) {
 	var service models.Service
 	err := r.db.First(&service, id).Error

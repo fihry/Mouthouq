@@ -61,9 +61,10 @@ func setupServer(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 	serviceHandler := handlers.NewServiceHandler(serviceService)
 	bookingHandler := handlers.NewBookingHandler(bookingService)
 	reviewHandler := handlers.NewReviewHandler(reviewService)
+	adminHandler := handlers.NewAdminHandler(userService, serviceService)
 
 	// Create routes Handlers container
-	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, bookingHandler, reviewHandler, cfg.Security.JWTSecret)
+	h := routes.NewHandlers(db, authHandler, userHandler, serviceHandler, bookingHandler, reviewHandler, adminHandler, cfg.Security.JWTSecret)
 
 	// Setup routes
 	routes.SetupRoutes(r, h)

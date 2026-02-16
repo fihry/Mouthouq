@@ -15,10 +15,11 @@ type Handlers struct {
 	service   *handlers.ServiceHandler
 	bookings  *handlers.BookingHandler
 	reviews   *handlers.ReviewHandler
+	admin     *handlers.AdminHandler
 	jwtSecret string
 }
 
-func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, bookings *handlers.BookingHandler, reviews *handlers.ReviewHandler, jwtSecret string) *Handlers {
+func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHandler, service *handlers.ServiceHandler, bookings *handlers.BookingHandler, reviews *handlers.ReviewHandler, admin *handlers.AdminHandler, jwtSecret string) *Handlers {
 	return &Handlers{
 		db:        db,
 		auth:      auth,
@@ -26,6 +27,7 @@ func NewHandlers(db *gorm.DB, auth *handlers.AuthHandler, users *handlers.UserHa
 		service:   service,
 		bookings:  bookings,
 		reviews:   reviews,
+		admin:     admin,
 		jwtSecret: jwtSecret,
 	}
 }
@@ -90,6 +92,15 @@ func SetupRoutes(r *gin.Engine, h *Handlers) {
 			{
 				reviews.POST("", h.reviews.Create)
 			}
+		}
+
+		admin := api.Group("/admin")
+		admin.Use(middleware.AuthMiddleware(h.jwtSecret), middleware.AdminMiddleware())
+		{
+			admin.GET("/users", h.admin.ListUsers)
+			admin.PATCH("/users/:id/role", h.admin.UpdateUserRole)
+			admin.GET("/services/pending", h.admin.ListPendingServices)
+			admin.PATCH("/services/:id/verify", h.admin.VerifyService)
 		}
 	}
 }

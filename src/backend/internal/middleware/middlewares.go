@@ -1,8 +1,10 @@
 package middleware
 
 import (
-	"mouthouq/internal/utils/jwt"
 	"strings"
+
+	"mouthouq/internal/models"
+	"mouthouq/internal/utils/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,6 +36,24 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 		c.Set("userId", claims.UserID)
 		c.Set("role", claims.Role)
 		c.Set("userType", claims.UserType)
+		c.Next()
+	}
+}
+
+func AdminMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		roleRaw, exists := c.Get("role")
+		if !exists {
+			c.JSON(403, gin.H{"error": "Admin role required"})
+			c.Abort()
+			return
+		}
+		role, ok := roleRaw.(string)
+		if !ok || role != string(models.RoleAdmin) {
+			c.JSON(403, gin.H{"error": "Admin role required"})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }

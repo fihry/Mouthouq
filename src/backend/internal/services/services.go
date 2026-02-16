@@ -28,6 +28,10 @@ func (s *ServiceService) List() ([]models.Service, error) {
 	return s.repo.List()
 }
 
+func (s *ServiceService) ListPending() ([]models.Service, error) {
+	return s.repo.ListPending()
+}
+
 func (s *ServiceService) Get(id uint) (*models.Service, error) {
 	return s.repo.FindByID(id)
 }
