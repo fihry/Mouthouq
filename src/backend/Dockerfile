@@ -26,9 +26,8 @@ RUN apk add --no-cache libc6-compat
 # Copy the compiled Go binary from the builder stage
 COPY --from=builder /out/backend /app/backend
 
-# Copy configuration and migrations
+# Copy configuration
 COPY internal/config /app/internal/config
-COPY internal/database/migrations /app/internal/database/migrations
 
 # Environment variables will be handled by docker-compose env_file
 

@@ -11,14 +11,16 @@ Mouthouq is a professional services marketplace platform connecting users with v
 
 ### Backend
 - Go
+- Gin
 - PostgreSQL
+- GORM (AutoMigrate)
 - JWT Authentication
-- UUID
+- bcrypt
 
 ### Frontend
 - Next.js
 - Tailwind CSS
-- React Query
+- shadcn/ui
 
 ### Infrastructure
 - Docker
@@ -55,24 +57,11 @@ cd src/frontend
 npm run dev
 ```
 
-4. Setup database (creates cluster, user, database, runs migrations):
-```bash 
-# Setup database
-make db-setup
-```
-
-5. Run migrations manually (optional):
+4. Start database (Postgres). Tables are created/updated via Gorm AutoMigrate on backend startup:
 ```bash
-   # Migrate up
-make migrate-up
-
-# Migrate down (rollback)
-make migrate-down
-
-# Create a new migration
-make migrate-create name=add_table_xyz
+make db-up
 ```
-6. Run development servers:
+5. Run development servers:
 ```bash
 # Backend
 make run-backend
@@ -81,9 +70,9 @@ make run-backend
 make run-frontend
 ```
 
-7. View backend logs:
+6. View backend logs:
 ```bash
-make logs
+make compose-logs
 ```
 
 

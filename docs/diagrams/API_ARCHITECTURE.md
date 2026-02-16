@@ -2,34 +2,12 @@
 
 ```mermaid
 flowchart TD
-    subgraph Client Layer
-        Web[Web Application]
-        Mobile[Mobile App]
-    end
+    Client[Web or Mobile Client] --> Frontend[Next.js Frontend]
+    Frontend --> API[Go Gin API /api/v1]
+    API --> Postgres[(PostgreSQL)]
 
-    subgraph API Gateway
-        Auth[Authentication API]
-        Rate[Rate Limiter]
-        Cache[Cache Layer]
-    end
+    API -. optional .-> Redis[(Redis Cache)]
+    API -. optional .-> MinIO[(MinIO Object Storage)]
+```
 
-    subgraph Core Services
-        Users[Users Service]
-        Services[Services API]
-        Posts[Posts Service]
-        Reviews[Reviews Service]
-        Notif[Notification Service]
-    end
-
-    subgraph Data Layer
-        PostgreSql[(PostgreSql)]
-        Redis[(Redis Cache)]
-    end
-
-    Web & Mobile --> Auth
-    Auth --> Users
-    Auth --> Rate
-    Rate --> Cache
-    Cache --> Users & Services & Posts & Reviews & Notif
-    Users & Services & Posts & Reviews --> PostgreSql
-    Notif --> Redis
+Note: Redis and MinIO are configured in docker-compose but not yet wired in the application.

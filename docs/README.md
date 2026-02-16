@@ -6,17 +6,22 @@ Our platform connects users with trusted professionals for household services li
 
 ## Technologies Used
 
-- **Backend**: Go, PostgreSQL, bcrypt, UUID
+- **Backend**: Go, PostgreSQL, GORM (AutoMigrate), bcrypt, JWT
 - **Frontend**: Next.js, Tailwind CSS
 - **Containerization**: Docker
 - **Deployment**: The platform will be deployed on cloud services such as AWS or DigitalOcean.
 
-## Core Features
+## Current Features
 
-- **Service Listings**: Companies can offer their services, and users can view available services by location, type, and rating.
-- **User Registration & Authentication**: Users can register, log in, and manage accounts using cookies and UUID for authentication.
-- **Post and Comment System**: Users can create posts, comment on them, and filter posts by activity or likes.
-- **Rating & Review System**: Users evaluate professionals after completing services, ensuring quality and fostering competition.
-- **Revenue Model**: We will offer a subscription model or charge a percentage on services completed through the platform.
-- **AI Features**: To be integrated in the future to recommend the best professionals based on user preferences and job history.
+- **Service Listings**: Professionals can create services; users can browse available services.
+- **User Registration & Authentication**: JWT-based registration and login.
+- **User Profiles**: Profile retrieval and updates for authenticated users.
 
+## Planned Features
+
+- **Bookings & Payments**: Booking flow with platform commission.
+- **Rating & Review System**: Users evaluate professionals after completed services.
+- **Messaging & Notifications**: Real-time communication and updates.
+- **Community Posts & Comments**: Discussions and service requests.
+- **AI Recommendations**: Match professionals based on preferences and history.
+- **Revenue Model**: Subscriptions or commission-based fees for professionals.
