@@ -30,14 +30,18 @@ type Service struct {
 var SupportedCategories = []string{
 	"Plumbing",
 	"Electrical",
+	"Electrical Work",
 	"Cleaning",
+	"House Cleaning",
 	"Painting",
 	"Carpentry",
 	"HVAC",
+	"AC Repair",
 	"Landscaping",
 	"Moving",
 	"Pest Control",
 	"Appliance Repair",
+	"Handyman",
 }
 
 // IsValidCategory checks if a category is in the supported list

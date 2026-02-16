@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"mouthouq/internal/models"
 	"mouthouq/internal/services"
@@ -72,10 +73,36 @@ func (h *ServiceHandler) Create(c *gin.Context) {
 		return
 	}
 
+	if strings.TrimSpace(service.Title) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Title is required"})
+		return
+	}
+
 	// Validate category
 	if !models.IsValidCategory(service.Category) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category. Please choose from supported categories."})
 		return
+	}
+
+	if service.PriceAmount <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Price amount must be greater than zero"})
+		return
+	}
+
+	if service.PriceUnit == "" {
+		service.PriceUnit = "job"
+	}
+
+	switch service.PriceUnit {
+	case "hour", "job", "day":
+		// allowed
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid price unit. Use hour, job, or day."})
+		return
+	}
+
+	if service.PriceCurrency == "" {
+		service.PriceCurrency = "MAD"
 	}
 
 	// Set provider ID from authenticated user
@@ -238,6 +265,31 @@ func (h *ServiceHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
 	}
+
+	service, err := h.service.Get(uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
+		return
+	}
+
+	userIDRaw, exists := c.Get("userId")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+		return
+	}
+	userID, ok := userIDRaw.(uint)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user identity"})
+		return
+	}
+
+	roleRaw, _ := c.Get("role")
+	role, _ := roleRaw.(string)
+	if role != string(models.RoleAdmin) && service.ProviderID != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Not authorized to delete this service"})
+		return
+	}
+
 	if err := h.service.Delete(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete service"})
 		return
