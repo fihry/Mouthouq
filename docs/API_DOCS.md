@@ -142,14 +142,24 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
 - **Description**: List bookings for the authenticated user.
   - Customers see their bookings.
   - Professionals/companies see bookings for their services.
+  - Admins see all bookings.
 
 ### GET /bookings/{id}
 - **Description**: Retrieve a booking by ID (owner or provider only).
 
+### PATCH /bookings/{id}/confirm
+- **Description**: Confirm a booking (professional/company only or admin).
+
+### PATCH /bookings/{id}/complete
+- **Description**: Complete a booking (professional/company only or admin).
+
+### PATCH /bookings/{id}/cancel
+- **Description**: Cancel a booking (customer, provider, or admin).
+
 ## Reviews
 
 ### POST /reviews
-- **Description**: Submit a review for a service (customers only).
+- **Description**: Submit a review for a service (customers only, requires completed booking, one per service).
 - **Auth**: Required.
 - **Request Body**:
   ```json
@@ -165,6 +175,33 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
 
 ### GET /reviews/{serviceId}
 - **Description**: Get all reviews for a specific service.
+
+## Admin (Auth Required, role=admin)
+
+### GET /admin/users
+- **Description**: List all users.
+
+### PATCH /admin/users/{id}/role
+- **Description**: Update a user's role.
+- **Request Body**:
+  ```json
+  {
+    "role": "admin"
+  }
+  ```
+
+### GET /admin/services/pending
+- **Description**: List services pending verification or activation.
+
+### PATCH /admin/services/{id}/verify
+- **Description**: Update service verification and activation flags.
+- **Request Body**:
+  ```json
+  {
+    "isVerified": true,
+    "isActive": true
+  }
+  ```
 
 ## Error Codes
 
