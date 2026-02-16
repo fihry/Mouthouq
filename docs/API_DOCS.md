@@ -3,6 +3,7 @@
 Base URL: `/api/v1`
 
 Authentication uses JWT via the `Authorization: Bearer <token>` header.
+All resource IDs are UUID strings.
 
 ## Health
 
@@ -54,7 +55,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
     "message": "Login successful",
     "token": "JWT_token_here",
     "user": {
-      "id": 1,
+      "id": "b3b76e2a-6e86-4cc6-9b18-1b5c2d2be3f3",
       "email": "user@example.com",
       "role": "user",
       "userType": "customer"
@@ -132,7 +133,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
 - **Request Body**:
   ```json
   {
-    "serviceId": 1,
+    "serviceId": "9cb9f4e1-57ec-4e3d-8f2b-6e9c2f2d2bd2",
     "scheduledAt": "2026-02-16T10:00:00Z",
     "notes": "Please call before arrival."
   }
@@ -167,7 +168,7 @@ Authentication uses JWT via the `Authorization: Bearer <token>` header.
 - **Request Body**:
   ```json
   {
-    "serviceId": 1,
+    "serviceId": "9cb9f4e1-57ec-4e3d-8f2b-6e9c2f2d2bd2",
     "rating": 5,
     "comment": "Excellent service!"
   }
