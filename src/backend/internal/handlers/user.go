@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"math"
 	"net/http"
+	"strings"
 
 	"mouthouq/internal/services"
 
@@ -99,14 +101,32 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
+	currentUser, err := h.service.GetByID(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
 	updates := map[string]interface{}{}
 
 	if req.Username != nil {
-		if *req.Username == "" {
+		username := strings.TrimSpace(*req.Username)
+		if username == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Username cannot be empty"})
 			return
 		}
-		updates["username"] = *req.Username
+		if username != currentUser.Username {
+			taken, err := h.service.IsUsernameTakenByOther(userID, username)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate username"})
+				return
+			}
+			if taken {
+				c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+				return
+			}
+			updates["username"] = username
+		}
 	}
 	if req.FirstName != nil {
 		updates["first_name"] = *req.FirstName
@@ -115,11 +135,23 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		updates["last_name"] = *req.LastName
 	}
 	if req.Email != nil {
-		if *req.Email == "" {
+		email := strings.TrimSpace(*req.Email)
+		if email == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Email cannot be empty"})
 			return
 		}
-		updates["email"] = *req.Email
+		if email != currentUser.Email {
+			taken, err := h.service.IsEmailTakenByOther(userID, email)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate email"})
+				return
+			}
+			if taken {
+				c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+				return
+			}
+			updates["email"] = email
+		}
 	}
 	if req.PhoneNumber != nil {
 		updates["phone_number"] = *req.PhoneNumber
@@ -131,9 +163,17 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 		updates["address"] = *req.Address
 	}
 	if req.Latitude != nil {
+		if math.IsNaN(*req.Latitude) || math.IsInf(*req.Latitude, 0) || *req.Latitude < -90 || *req.Latitude > 90 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Latitude must be between -90 and 90"})
+			return
+		}
 		updates["latitude"] = *req.Latitude
 	}
 	if req.Longitude != nil {
+		if math.IsNaN(*req.Longitude) || math.IsInf(*req.Longitude, 0) || *req.Longitude < -180 || *req.Longitude > 180 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Longitude must be between -180 and 180"})
+			return
+		}
 		updates["longitude"] = *req.Longitude
 	}
 	if req.ProfileImage != nil {

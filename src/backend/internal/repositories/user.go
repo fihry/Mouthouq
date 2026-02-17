@@ -37,6 +37,26 @@ func (r *UserRepository) UpdateFields(id uuid.UUID, updates map[string]interface
 	return r.db.Model(&models.User{}).Where("id = ?", id).Updates(updates).Error
 }
 
+func (r *UserRepository) IsUsernameTakenByOther(userID uuid.UUID, username string) (bool, error) {
+	var count int64
+	if err := r.db.Model(&models.User{}).
+		Where("username = ? AND id <> ?", username, userID).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (r *UserRepository) IsEmailTakenByOther(userID uuid.UUID, email string) (bool, error) {
+	var count int64
+	if err := r.db.Model(&models.User{}).
+		Where("email = ? AND id <> ?", email, userID).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *UserRepository) Delete(id uuid.UUID) error {
 	return r.db.Delete(&models.User{}, "id = ?", id).Error
 }

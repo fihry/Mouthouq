@@ -31,6 +31,14 @@ func (s *UserService) UpdateFields(id uuid.UUID, updates map[string]interface{})
 	return s.repo.UpdateFields(id, updates)
 }
 
+func (s *UserService) IsUsernameTakenByOther(userID uuid.UUID, username string) (bool, error) {
+	return s.repo.IsUsernameTakenByOther(userID, username)
+}
+
+func (s *UserService) IsEmailTakenByOther(userID uuid.UUID, email string) (bool, error) {
+	return s.repo.IsEmailTakenByOther(userID, email)
+}
+
 func (s *UserService) Delete(id uuid.UUID) error {
 	return s.repo.Delete(id)
 }
