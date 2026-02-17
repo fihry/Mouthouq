@@ -23,3 +23,9 @@ func (r *AuthRepository) GetUserByEmail(email string) (*models.User, error) {
 	err := r.db.Where("email = ?", email).First(&user).Error
 	return &user, err
 }
+
+func (r *AuthRepository) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	err := r.db.Where("username = ?", username).First(&user).Error
+	return &user, err
+}

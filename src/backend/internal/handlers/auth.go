@@ -80,7 +80,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	if err := h.service.Register(&user); err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Registration failed. Please check your details."})
+		msg := err.Error()
+		switch {
+		case strings.Contains(msg, "already exists"):
+			c.JSON(http.StatusConflict, gin.H{"error": msg})
+		case strings.Contains(msg, "missing required fields"), strings.Contains(msg, "invalid user type"):
+			c.JSON(http.StatusBadRequest, gin.H{"error": msg})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Registration failed"})
+		}
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})

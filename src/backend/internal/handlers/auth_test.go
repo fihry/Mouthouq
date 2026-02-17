@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"mouthouq/internal/models"
 	"mouthouq/internal/testutil"
 )
 
@@ -59,5 +60,29 @@ func TestRegisterAndLogin(t *testing.T) {
 	}
 	if payload["token"] == "" {
 		t.Fatalf("expected token in response")
+	}
+}
+
+func TestRegisterRejectsDuplicateUsername(t *testing.T) {
+	db := testutil.OpenTestDB(t)
+	r := testutil.NewRouter(t, db)
+
+	existing := testutil.CreateUser(t, db, models.TypeCustomer, models.RoleUser)
+
+	registerBody := map[string]string{
+		"username":    existing.Username,
+		"firstName":   "Another",
+		"lastName":    "User",
+		"email":       "another@example.com",
+		"password":    "Password123!",
+		"phoneNumber": "+212600000112",
+		"city":        "Rabat",
+		"address":     "Street 2",
+		"userType":    "customer",
+	}
+
+	resp := testutil.DoJSONRequest(t, r, http.MethodPost, "/api/v1/auth/register", registerBody, nil)
+	if resp.Code != http.StatusConflict {
+		t.Fatalf("expected 409, got %d", resp.Code)
 	}
 }

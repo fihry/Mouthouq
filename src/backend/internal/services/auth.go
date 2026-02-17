@@ -7,8 +7,8 @@ import (
 	"mouthouq/internal/models"
 	"mouthouq/internal/repositories"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthService struct {
@@ -35,11 +35,24 @@ func (s *AuthService) Register(user *models.User) error {
 		return errors.New("invalid user type")
 	}
 
-	// Check if user exists
-	existing, _ := s.repo.GetUserByEmail(user.Email)
-	if existing.ID != uuid.Nil {
-		return errors.New("user already exists")
+	// Check if email exists
+	existingByEmail, err := s.repo.GetUserByEmail(user.Email)
+	if err == nil && existingByEmail != nil {
+		return errors.New("email already exists")
 	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
+	// Check if username exists
+	existingByUsername, err := s.repo.GetUserByUsername(user.Username)
+	if err == nil && existingByUsername != nil {
+		return errors.New("username already exists")
+	}
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+
 	// Hash password
 	hashed, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
