@@ -67,12 +67,18 @@ export default function ServicesPage() {
   async function fetchServices() {
     setIsLoading(true)
     try {
-      const data = await apiClient.get("/services")
-      // Filter to show only active and verified services to customers
-      const filtered = data.filter((s: any) => s.IsActive && s.IsVerified)
+      const response = await apiClient.get("/services")
+      const rawServices = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : []
 
-      const mapped = filtered.map((s: any) => ({
-        id: s.ID,
+      // Backend already lists active + verified services only, keep guard for safety.
+      const filtered = rawServices.filter((s: any) => s?.IsActive && s?.IsVerified)
+
+      const mapped = filtered.map((s: any, index: number) => ({
+        id: s.id ?? s.ID ?? `service-${index}`,
         title: s.Title,
         price: s.PriceAmount,
         priceText: `From ${s.PriceAmount} ${s.PriceCurrency || "MAD"}`,
@@ -468,8 +474,8 @@ export default function ServicesPage() {
             </div>
           ) : filteredAndSortedServices.length > 0 ? (
             <div className={`grid gap-6 ${viewMode === "grid" ? "grid-cols-1 lg:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"}`}>
-              {filteredAndSortedServices.map((service) => (
-                <ServiceCard key={service.id} service={service} />
+              {filteredAndSortedServices.map((service, index) => (
+                <ServiceCard key={service.id ?? `service-${index}`} service={service} />
               ))}
             </div>
           ) : (
