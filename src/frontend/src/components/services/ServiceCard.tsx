@@ -62,7 +62,7 @@ export const ServiceCard = ({ service }: { service: ServiceProp }) => {
                     <div className="absolute top-4 left-4 flex flex-col space-y-2">
                         {service.badges.map((badge, index) => (
                             <div
-                                key={index}
+                                key={`${badge}-${index}`}
                                 className={`flex items-center px-2 py-1 rounded-full text-xs font-medium text-white ${badge === "AI Match" ? "bg-orange-500" : badge === "Emergency" ? "bg-red-500" : "bg-green-500"
                                     }`}
                             >
@@ -130,7 +130,7 @@ export const ServiceCard = ({ service }: { service: ServiceProp }) => {
 
                     <div className="flex flex-wrap gap-2 mb-4">
                         {service.tags.slice(0, 3).map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-200">
+                            <Badge key={`${tag}-${index}`} variant="secondary" className="bg-orange-100 text-orange-700 hover:bg-orange-200">
                                 {tag}
                             </Badge>
                         ))}
@@ -153,11 +153,28 @@ export const ServiceCard = ({ service }: { service: ServiceProp }) => {
                             </div>
                         </div>
                         <div className="flex space-x-2">
-                            <Button size="sm" variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    if (!service.phone) return
+                                    window.location.href = `tel:${service.phone}`
+                                }}
+                                disabled={!service.phone}
+                            >
                                 <Phone className="h-3 w-3 mr-1" />
                                 Call
                             </Button>
-                            <Button size="sm" className="bg-orange-500 text-white hover:bg-orange-600 shadow-sm hover:shadow-md transition-all">
+                            <Button
+                                size="sm"
+                                className="bg-orange-500 text-white hover:bg-orange-600 shadow-sm hover:shadow-md transition-all"
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    setIsBookingOpen(true)
+                                }}
+                            >
                                 <Calendar className="h-4 w-4 mr-1" />
                                 Book Now
                             </Button>
@@ -169,6 +186,7 @@ export const ServiceCard = ({ service }: { service: ServiceProp }) => {
                 isOpen={isBookingOpen}
                 onClose={() => setIsBookingOpen(false)}
                 service={{
+                    id: String(service.id),
                     title: service.title,
                     provider: service.provider,
                     priceText: service.priceText,
