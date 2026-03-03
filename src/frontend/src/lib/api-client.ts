@@ -6,7 +6,7 @@
 const BASE_URL = "/api/v1";
 
 interface RequestOptions extends RequestInit {
-    params?: Record<string, string>;
+    params?: Record<string, string | number | boolean>;
 }
 
 interface ApiErrorResponse {
@@ -27,13 +27,15 @@ export const apiClient: ApiClient = async <TResponse = unknown>(
     options: RequestOptions = {}
 ) => {
     const { params, headers, ...customConfig } = options;
+    const isFormDataBody = typeof FormData !== "undefined" && customConfig.body instanceof FormData;
 
     // Get token from localStorage
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    const defaultHeaders: HeadersInit = {
-        "Content-Type": "application/json",
-    };
+    const defaultHeaders: HeadersInit = {};
+    if (!isFormDataBody) {
+        defaultHeaders["Content-Type"] = "application/json";
+    }
 
     if (token) {
         defaultHeaders["Authorization"] = `Bearer ${token}`;
@@ -42,7 +44,9 @@ export const apiClient: ApiClient = async <TResponse = unknown>(
     // Construct URL with query parameters
     let url = `${BASE_URL}${endpoint}`;
     if (params) {
-        const searchParams = new URLSearchParams(params);
+        const searchParams = new URLSearchParams(
+            Object.entries(params).map(([key, value]) => [key, String(value)])
+        );
         url += `?${searchParams.toString()}`;
     }
 
@@ -63,15 +67,17 @@ export const apiClient: ApiClient = async <TResponse = unknown>(
             return null as TResponse;
         }
 
-        const data = await response.json() as unknown;
+        const contentType = response.headers.get("content-type") || "";
+        const isJsonResponse = contentType.includes("application/json");
+        const data = isJsonResponse ? await response.json() as unknown : await response.text();
 
         if (response.ok) {
             return data as TResponse;
         }
 
         // Standardize error handling
-        const errorData = data as ApiErrorResponse;
-        const errorMsg = errorData.error || errorData.message || "Something went wrong";
+        const errorData = isJsonResponse ? (data as ApiErrorResponse) : null;
+        const errorMsg = errorData?.error || errorData?.message || response.statusText || "Something went wrong";
         throw new Error(errorMsg);
     } catch (error: unknown) {
         console.error(`API Error [${options.method || "GET"}] ${endpoint}:`, error);
