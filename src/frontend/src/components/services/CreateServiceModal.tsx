@@ -7,7 +7,6 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,6 +48,7 @@ export const CreateServiceModal = ({ isOpen, onClose, onSuccess }: CreateService
                 priceAmount: parseFloat(formData.priceAmount),
                 priceCurrency: "MAD",
                 priceUnit: "job",
+                images: ["/placeholder.svg"],
             })
 
             toast.success("Service Created!", {
