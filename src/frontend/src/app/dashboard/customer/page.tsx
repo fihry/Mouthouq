@@ -25,6 +25,17 @@ interface UserProfile {
     city: string;
 }
 
+interface UserProfileApiResponse {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    city?: string;
+    FirstName?: string;
+    LastName?: string;
+    Email?: string;
+    City?: string;
+}
+
 export default function CustomerDashboard() {
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -32,8 +43,13 @@ export default function CustomerDashboard() {
     useEffect(() => {
         async function fetchProfile() {
             try {
-                const data = await apiClient.get("/users/profile")
-                setProfile(data)
+                const data = await apiClient.get<UserProfileApiResponse>("/users/profile")
+                setProfile({
+                    firstName: data.firstName ?? data.FirstName ?? "",
+                    lastName: data.lastName ?? data.LastName ?? "",
+                    email: data.email ?? data.Email ?? "",
+                    city: data.city ?? data.City ?? "",
+                })
             } catch (error) {
                 console.error("Failed to fetch profile:", error)
                 toast.error("Failed to load profile", {
