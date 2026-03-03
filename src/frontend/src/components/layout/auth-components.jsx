@@ -683,11 +683,11 @@ export const ReviewStep = ({ formData, userType, errors, setErrors, onValidate }
           />
           <label htmlFor="agreeToTerms" className="text-sm text-gray-600">
             I agree to the{" "}
-            <a href="/" className="text-orange-600 hover:text-orange-700">
+            <a href="/terms" className="text-orange-600 hover:text-orange-700">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="/" className="text-orange-600 hover:text-orange-700">
+            <a href="/privacy" className="text-orange-600 hover:text-orange-700">
               Privacy Policy
             </a>{" "}
             *
