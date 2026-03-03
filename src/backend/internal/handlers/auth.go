@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,15 +32,31 @@ type registerRequest struct {
 }
 
 func NewAuthHandler(service *services.AuthService, jwtSecret string, expiration string) *AuthHandler {
-	duration, err := time.ParseDuration(expiration + "h")
-	if err != nil {
-		duration = time.Hour * 24 // Fallback
-	}
+	duration := parseTokenDuration(expiration)
 	return &AuthHandler{
 		service:     service,
 		jwtSecret:   jwtSecret,
 		jwtDuration: duration,
 	}
+}
+
+func parseTokenDuration(expiration string) time.Duration {
+	value := strings.TrimSpace(expiration)
+	if value == "" {
+		return 24 * time.Hour
+	}
+
+	// Supports Go-style durations like "24h", "30m", "3600s".
+	if duration, err := time.ParseDuration(value); err == nil {
+		return duration
+	}
+
+	// Backward-compatible plain integer format interpreted as seconds.
+	if seconds, err := strconv.Atoi(value); err == nil && seconds > 0 {
+		return time.Duration(seconds) * time.Second
+	}
+
+	return 24 * time.Hour
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
