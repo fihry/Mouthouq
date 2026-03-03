@@ -21,6 +21,8 @@ go.work
 /src/backend/vendor/
 /src/backend/tmp/
 /src/backend/bin/
+/src/backend/main
+/src/backend/cmd/cmd
 
 # -----------------------
 # Node / frontend
