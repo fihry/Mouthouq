@@ -26,6 +26,15 @@ interface UserProfile {
     email: string;
 }
 
+interface UserProfileApiResponse {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    FirstName?: string;
+    LastName?: string;
+    Email?: string;
+}
+
 export default function ProfessionalDashboard() {
     const [profile, setProfile] = React.useState<UserProfile | null>(null)
     const [isLoading, setIsLoading] = React.useState(true)
@@ -34,8 +43,12 @@ export default function ProfessionalDashboard() {
     React.useEffect(() => {
         async function fetchProfile() {
             try {
-                const data = await apiClient.get("/users/profile")
-                setProfile(data)
+                const data = await apiClient.get<UserProfileApiResponse>("/users/profile")
+                setProfile({
+                    firstName: data.firstName ?? data.FirstName ?? "",
+                    lastName: data.lastName ?? data.LastName ?? "",
+                    email: data.email ?? data.Email ?? "",
+                })
             } catch (error) {
                 console.error("Failed to fetch profile:", error)
                 toast.error("Failed to load profile", {
