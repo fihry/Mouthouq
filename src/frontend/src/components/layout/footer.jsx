@@ -150,10 +150,10 @@ export default function Footer() {
 
             {/* Legal Links */}
             <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <Link href="/" className="hover:text-orange-400 transition-colors">
+              <Link href="/privacy" className="hover:text-orange-400 transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/" className="hover:text-orange-400 transition-colors">
+              <Link href="/terms" className="hover:text-orange-400 transition-colors">
                 Terms of Service
               </Link>
               <span>© {currentYear} mouthouq. All rights reserved.</span>
