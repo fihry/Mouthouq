@@ -80,6 +80,8 @@ interface MarketplaceService {
   email: string
 }
 
+type ServicesApiResponse = BackendService[] | { data?: BackendService[] }
+
 export default function ServicesPage() {
   const [services, setServices] = useState<MarketplaceService[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -114,10 +116,10 @@ export default function ServicesPage() {
   async function fetchServices() {
     setIsLoading(true)
     try {
-      const response = await apiClient.get("/services")
+      const response = await apiClient.get<ServicesApiResponse>("/services")
       const rawServices: BackendService[] = Array.isArray(response)
         ? response
-        : Array.isArray(response?.data)
+        : Array.isArray(response.data)
           ? response.data
           : []
 
