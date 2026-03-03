@@ -14,7 +14,18 @@ interface ApiErrorResponse {
     message?: string;
 }
 
-export async function apiClient(endpoint: string, options: RequestOptions = {}) {
+type ApiClient = {
+    <TResponse = unknown>(endpoint: string, options?: RequestOptions): Promise<TResponse>;
+    get<TResponse = unknown>(endpoint: string, options?: RequestOptions): Promise<TResponse>;
+    post<TResponse = unknown, TBody = unknown>(endpoint: string, body: TBody, options?: RequestOptions): Promise<TResponse>;
+    put<TResponse = unknown, TBody = unknown>(endpoint: string, body: TBody, options?: RequestOptions): Promise<TResponse>;
+    delete<TResponse = unknown>(endpoint: string, options?: RequestOptions): Promise<TResponse>;
+}
+
+export const apiClient: ApiClient = async <TResponse = unknown>(
+    endpoint: string,
+    options: RequestOptions = {}
+) => {
     const { params, headers, ...customConfig } = options;
 
     // Get token from localStorage
@@ -49,13 +60,13 @@ export async function apiClient(endpoint: string, options: RequestOptions = {}) 
 
         // Handle 204 No Content
         if (response.status === 204) {
-            return null;
+            return null as TResponse;
         }
 
         const data = await response.json() as unknown;
 
         if (response.ok) {
-            return data;
+            return data as TResponse;
         }
 
         // Standardize error handling
@@ -69,9 +80,11 @@ export async function apiClient(endpoint: string, options: RequestOptions = {}) 
 }
 
 // Convenience methods
-apiClient.get = (endpoint: string, options?: RequestOptions) => apiClient(endpoint, { ...options, method: "GET" });
-apiClient.post = (endpoint: string, body: unknown, options?: RequestOptions) =>
-    apiClient(endpoint, { ...options, method: "POST", body: JSON.stringify(body) });
-apiClient.put = (endpoint: string, body: unknown, options?: RequestOptions) =>
-    apiClient(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) });
-apiClient.delete = (endpoint: string, options?: RequestOptions) => apiClient(endpoint, { ...options, method: "DELETE" });
+apiClient.get = <TResponse = unknown>(endpoint: string, options?: RequestOptions) =>
+    apiClient<TResponse>(endpoint, { ...options, method: "GET" });
+apiClient.post = <TResponse = unknown, TBody = unknown>(endpoint: string, body: TBody, options?: RequestOptions) =>
+    apiClient<TResponse>(endpoint, { ...options, method: "POST", body: JSON.stringify(body) });
+apiClient.put = <TResponse = unknown, TBody = unknown>(endpoint: string, body: TBody, options?: RequestOptions) =>
+    apiClient<TResponse>(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) });
+apiClient.delete = <TResponse = unknown>(endpoint: string, options?: RequestOptions) =>
+    apiClient<TResponse>(endpoint, { ...options, method: "DELETE" });
