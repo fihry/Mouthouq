@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -155,7 +155,7 @@ export const BasicInfoStep = ({ formData, setFormData, errors, setErrors, onVali
   }
 
   // Call validation whenever form data changes
-  useState(() => {
+  useEffect(() => {
     if (formData.username || formData.firstName || formData.lastName || formData.email || formData.password || formData.confirmPassword) {
       validateStep()
     }
