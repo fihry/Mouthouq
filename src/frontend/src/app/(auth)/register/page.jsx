@@ -164,8 +164,6 @@ export default function RegisterPage() {
 
         const response = await apiClient.post("/auth/register", payload)
 
-        console.log("Registration successful:", response)
-
         // If backend returns token on register, store it
         if (response.token) {
           localStorage.setItem("token", response.token)
@@ -188,8 +186,9 @@ export default function RegisterPage() {
         }, 500)
       } catch (error) {
         console.error("Registration error:", error)
+        const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again."
         toast.error("Registration Failed", {
-          description: error.message || "Registration failed. Please try again.",
+          description: errorMessage,
         })
       } finally {
         setIsLoading(false)
