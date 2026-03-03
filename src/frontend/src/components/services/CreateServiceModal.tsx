@@ -57,9 +57,10 @@ export const CreateServiceModal = ({ isOpen, onClose, onSuccess }: CreateService
 
             setStep(3) // Success step
             if (onSuccess) onSuccess()
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Please check your information."
             toast.error("Creation Failed", {
-                description: error.message || "Please check your information.",
+                description: message,
             })
         } finally {
             setIsLoading(false)
