@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { BookingModal } from "./BookingModal"
 
 interface ServiceProp {
-    id: number
+    id: string | number
     title: string
     price: number
     priceText: string

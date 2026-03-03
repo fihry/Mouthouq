@@ -33,8 +33,55 @@ const categories = [
 
 const locations = ["Casablanca", "Rabat", "Marrakech", "Fes", "Tangier", "Agadir", "Meknes", "Oujda"]
 
+interface BackendService {
+  id?: string
+  ID?: string
+  Title?: string
+  PriceAmount?: number
+  PriceCurrency?: string
+  City?: string
+  RatingAverage?: number
+  RatingCount?: number
+  Images?: string[]
+  Description?: string
+  Tags?: string[]
+  ResponseTimeMins?: number
+  IsVerified?: boolean
+  IsActive?: boolean
+  TrustScore?: number
+  Category?: string
+  Phone?: string
+  Email?: string
+}
+
+interface MarketplaceService {
+  id: string
+  title: string
+  price: number
+  priceText: string
+  provider: string
+  providerImage: string
+  location: string
+  distance: number
+  rating: number
+  reviews: number
+  image: string
+  description: string
+  tags: string[]
+  responseTime: number
+  responseTimeText: string
+  badges: string[]
+  category: string
+  availability: string
+  experience: number
+  completedJobs: number
+  isEmergency: boolean
+  phone: string
+  email: string
+}
+
 export default function ServicesPage() {
-  const [services, setServices] = useState<any[]>([])
+  const [services, setServices] = useState<MarketplaceService[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("relevance")
@@ -68,43 +115,53 @@ export default function ServicesPage() {
     setIsLoading(true)
     try {
       const response = await apiClient.get("/services")
-      const rawServices = Array.isArray(response)
+      const rawServices: BackendService[] = Array.isArray(response)
         ? response
         : Array.isArray(response?.data)
           ? response.data
           : []
 
       // Backend already lists active + verified services only, keep guard for safety.
-      const filtered = rawServices.filter((s: any) => s?.IsActive && s?.IsVerified)
+      const filtered = rawServices.filter((s) => s?.IsActive && s?.IsVerified)
 
-      const mapped = filtered.map((s: any, index: number) => ({
-        id: s.id ?? s.ID ?? `service-${index}`,
-        title: s.Title,
-        price: s.PriceAmount,
-        priceText: `From ${s.PriceAmount} ${s.PriceCurrency || "MAD"}`,
-        provider: "Verified Provider",
-        providerImage: "/placeholder.svg",
-        location: s.City || "Casablanca",
-        distance: 2.5,
-        rating: s.RatingAverage || 0,
-        reviews: s.RatingCount || 0,
-        image: s.Images?.[0] || "/placeholder.svg",
-        description: s.Description,
-        tags: s.Tags || [],
-        responseTime: s.ResponseTimeMins || 60,
-        responseTimeText: `< ${s.ResponseTimeMins || 60} mins`,
-        badges: [
-          ...(s.IsVerified ? ["Verified"] : []),
-          ...(s.TrustScore > 0.8 ? ["AI Match"] : [])
-        ],
-        category: s.Category,
-        availability: "24/7",
-        experience: 5,
-        completedJobs: 100,
-        isEmergency: s.Tags?.includes("Emergency") || false,
-        phone: s.Phone || "",
-        email: s.Email || ""
-      }))
+      const mapped: MarketplaceService[] = filtered.map((s, index) => {
+        const id = s.id ?? s.ID ?? `service-${index}`
+        const priceAmount = typeof s.PriceAmount === "number" ? s.PriceAmount : 0
+        const ratingAverage = typeof s.RatingAverage === "number" ? s.RatingAverage : 0
+        const ratingCount = typeof s.RatingCount === "number" ? s.RatingCount : 0
+        const responseTimeMins = typeof s.ResponseTimeMins === "number" ? s.ResponseTimeMins : 60
+        const tags = Array.isArray(s.Tags) ? s.Tags : []
+        const images = Array.isArray(s.Images) ? s.Images : []
+
+        return {
+          id,
+          title: s.Title || "Service",
+          price: priceAmount,
+          priceText: `From ${priceAmount} ${s.PriceCurrency || "MAD"}`,
+          provider: "Verified Provider",
+          providerImage: "/placeholder.svg",
+          location: s.City || "Casablanca",
+          distance: 2.5,
+          rating: ratingAverage,
+          reviews: ratingCount,
+          image: images[0] || "/placeholder.svg",
+          description: s.Description || "",
+          tags,
+          responseTime: responseTimeMins,
+          responseTimeText: `< ${responseTimeMins} mins`,
+          badges: [
+            ...(s.IsVerified ? ["Verified"] : []),
+            ...((s.TrustScore || 0) > 0.8 ? ["AI Match"] : [])
+          ],
+          category: s.Category || "General",
+          availability: "24/7",
+          experience: 5,
+          completedJobs: 100,
+          isEmergency: tags.includes("Emergency"),
+          phone: s.Phone || "",
+          email: s.Email || ""
+        }
+      })
       setServices(mapped)
     } catch (error) {
       console.error("Failed to fetch services:", error)
