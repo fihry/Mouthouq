@@ -74,13 +74,13 @@ export default function NavBar() {
               Services
             </Link>
             <Link
-              href="/auth?type=professional"
+              href="/register?type=professional"
               className="text-sm font-medium transition-colors hover:text-red-600 text-gray-700"
             >
               Become a Professional
             </Link>
             <Link
-              href="/post-request"
+              href="/services"
               className="text-sm font-semibold transition-all hover:text-red-600 text-gray-700 hover:scale-105"
             >
               Post a Request
@@ -187,14 +187,14 @@ export default function NavBar() {
               Services
             </Link>
             <Link
-              href="/auth?type=professional"
+              href="/register?type=professional"
               className="block px-4 py-3 rounded-xl text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Become a Professional
             </Link>
             <Link
-              href="/post-request"
+              href="/services"
               className="block px-4 py-3 rounded-xl text-base font-semibold text-gray-700 hover:text-red-600 hover:bg-red-50 transition-all"
               onClick={() => setIsMobileMenuOpen(false)}
             >
