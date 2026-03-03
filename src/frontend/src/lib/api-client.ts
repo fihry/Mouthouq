@@ -9,6 +9,11 @@ interface RequestOptions extends RequestInit {
     params?: Record<string, string>;
 }
 
+interface ApiErrorResponse {
+    error?: string;
+    message?: string;
+}
+
 export async function apiClient(endpoint: string, options: RequestOptions = {}) {
     const { params, headers, ...customConfig } = options;
 
@@ -47,16 +52,17 @@ export async function apiClient(endpoint: string, options: RequestOptions = {}) 
             return null;
         }
 
-        const data = await response.json();
+        const data = await response.json() as unknown;
 
         if (response.ok) {
             return data;
         }
 
         // Standardize error handling
-        const errorMsg = data?.error || data?.message || "Something went wrong";
+        const errorData = data as ApiErrorResponse;
+        const errorMsg = errorData.error || errorData.message || "Something went wrong";
         throw new Error(errorMsg);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error(`API Error [${options.method || "GET"}] ${endpoint}:`, error);
         throw error;
     }
@@ -64,8 +70,8 @@ export async function apiClient(endpoint: string, options: RequestOptions = {}) 
 
 // Convenience methods
 apiClient.get = (endpoint: string, options?: RequestOptions) => apiClient(endpoint, { ...options, method: "GET" });
-apiClient.post = (endpoint: string, body: any, options?: RequestOptions) =>
+apiClient.post = (endpoint: string, body: unknown, options?: RequestOptions) =>
     apiClient(endpoint, { ...options, method: "POST", body: JSON.stringify(body) });
-apiClient.put = (endpoint: string, body: any, options?: RequestOptions) =>
+apiClient.put = (endpoint: string, body: unknown, options?: RequestOptions) =>
     apiClient(endpoint, { ...options, method: "PUT", body: JSON.stringify(body) });
 apiClient.delete = (endpoint: string, options?: RequestOptions) => apiClient(endpoint, { ...options, method: "DELETE" });
