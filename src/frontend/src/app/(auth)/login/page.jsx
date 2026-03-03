@@ -9,6 +9,7 @@ import { Eye, EyeOff, User, Mail, Briefcase } from "lucide-react"
 import { BenefitsSection, validateEmail } from "@/components/layout/auth-components"
 import { MouthouqOriginalLogo } from "@/components/shared/logo"
 import { apiClient } from "@/lib/api-client"
+import { setSession } from "@/lib/session"
 import { toast } from "sonner"
 
 export default function LoginPage() {
@@ -64,12 +65,13 @@ export default function LoginPage() {
         password: formData.password,
       })
 
-      // Store token and user info
-      if (response.token) {
-        localStorage.setItem("token", response.token)
+      if (!response?.token || !response?.user) {
+        throw new Error("Invalid authentication response")
       }
-      if (response.user) {
-        localStorage.setItem("user", JSON.stringify(response.user))
+
+      const authenticatedUser = setSession(response.token, response.user)
+      if (!authenticatedUser) {
+        throw new Error("Failed to store session")
       }
 
       // Show success toast
@@ -77,10 +79,15 @@ export default function LoginPage() {
         description: "You have successfully logged in.",
       })
 
-      const authenticatedUserType = response?.user?.userType
+      const authenticatedUserType = authenticatedUser.userType
+      const authenticatedRole = authenticatedUser.role
 
       // Handle success - redirect to dashboard after a brief delay
       setTimeout(() => {
+        if (authenticatedRole === "admin") {
+          window.location.href = "/dashboard/admin"
+          return
+        }
         if (authenticatedUserType === "professional" || authenticatedUserType === "company") {
           window.location.href = "/dashboard/professional"
           return

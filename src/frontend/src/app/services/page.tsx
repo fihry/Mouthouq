@@ -16,6 +16,7 @@ import NavBar from "@/components/layout/NaveBar"
 import { ServiceCard } from "@/components/services/ServiceCard"
 import { CreateServiceModal } from "@/components/services/CreateServiceModal"
 import { apiClient } from "@/lib/api-client"
+import { getStoredUser } from "@/lib/session"
 import { toast } from "sonner"
 
 const categories = [
@@ -101,16 +102,8 @@ export default function ServicesPage() {
   useEffect(() => {
     fetchServices()
 
-    // Check user type from localStorage
-    const userStr = localStorage.getItem("user")
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr)
-        setUserType(user.userType || null)
-      } catch (error) {
-        console.error("Failed to parse user data:", error)
-      }
-    }
+    const storedUser = getStoredUser()
+    setUserType(storedUser?.userType || null)
   }, [])
 
   async function fetchServices() {

@@ -7,6 +7,7 @@ import { useState,useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { MouthouqOriginalLogo } from "@/components/shared/logo"
+import { clearSession, getStoredUser } from "@/lib/session"
 
 
 import {
@@ -24,17 +25,7 @@ export default function NavBar() {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    // Check for user in localStorage on mount
-    if (typeof window !== 'undefined') {
-      const storedUser = localStorage.getItem("user")
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser))
-        } catch (e) {
-          console.error("Failed to parse user from localStorage", e)
-        }
-      }
-    }
+    setUser(getStoredUser())
   }, [])
 
   const toggleMobileMenu = () => {
@@ -42,8 +33,7 @@ export default function NavBar() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
+    clearSession()
     window.location.href = "/"
   }
 
@@ -107,14 +97,12 @@ export default function NavBar() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <Link href={user.userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"}>
+                      <Link href={user.role === "admin" ? "/dashboard/admin" : user.userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"}>
                         Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={user.userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"}>
-                        Profile Settings
-                      </Link>
+                      <Link href="/profile">Profile Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleLogout}>
@@ -207,11 +195,18 @@ export default function NavBar() {
               {user ? (
                 <>
                   <Link
-                    href={user.userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"}
+                    href={user.role === "admin" ? "/dashboard/admin" : user.userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"}
                     className="block px-4 py-3 rounded-xl text-base font-bold text-orange-600 bg-orange-50 transition-all"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Dashboard
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-3 rounded-xl text-base font-semibold text-gray-700 hover:bg-gray-50 transition-all"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Profile Settings
                   </Link>
                   <button
                     onClick={handleLogout}
