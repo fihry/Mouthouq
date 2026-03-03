@@ -112,7 +112,9 @@ export default function NavBar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/profile">Profile Settings</Link>
+                      <Link href={user.userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"}>
+                        Profile Settings
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleLogout}>
