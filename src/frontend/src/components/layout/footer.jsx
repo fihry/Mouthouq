@@ -16,24 +16,24 @@ export default function Footer() {
   ]
 
   const professionalLinks = [
-    { name: "Join as Professional", href: "/auth?type=professional" },
-    { name: "Professional Dashboard", href: "/dashboard" },
-    { name: "Success Stories", href: "/success-stories" },
-    { name: "Professional Resources", href: "/resources" },
+    { name: "Join as Professional", href: "/register?type=professional" },
+    { name: "Professional Dashboard", href: "/dashboard/professional" },
+    { name: "Success Stories", href: "/services?sort=rating" },
+    { name: "Professional Resources", href: "/services" },
   ]
 
   const supportLinks = [
-    { name: "Help Center", href: "/help" },
-    { name: "Contact Us", href: "/contact" },
-    { name: "Safety", href: "/safety" },
-    { name: "Trust & Safety", href: "/trust-safety" },
+    { name: "Help Center", href: "/services" },
+    { name: "Contact Us", href: "/" },
+    { name: "Safety", href: "/" },
+    { name: "Trust & Safety", href: "/" },
   ]
 
   const companyLinks = [
-    { name: "About Us", href: "/about" },
-    { name: "Careers", href: "/careers" },
-    { name: "Press", href: "/press" },
-    { name: "Blog", href: "/blog" },
+    { name: "About Us", href: "/" },
+    { name: "Careers", href: "/" },
+    { name: "Press", href: "/" },
+    { name: "Blog", href: "/" },
   ]
 
   const socialLinks = [
@@ -150,10 +150,10 @@ export default function Footer() {
 
             {/* Legal Links */}
             <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <Link href="/privacy" className="hover:text-orange-400 transition-colors">
+              <Link href="/" className="hover:text-orange-400 transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="hover:text-orange-400 transition-colors">
+              <Link href="/" className="hover:text-orange-400 transition-colors">
                 Terms of Service
               </Link>
               <span>© {currentYear} mouthouq. All rights reserved.</span>
