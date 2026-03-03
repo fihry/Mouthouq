@@ -64,8 +64,6 @@ export default function LoginPage() {
         password: formData.password,
       })
 
-      console.log("Login successful:", response)
-
       // Store token and user info
       if (response.token) {
         localStorage.setItem("token", response.token)
@@ -91,8 +89,9 @@ export default function LoginPage() {
       }, 500)
     } catch (error) {
       console.error("Login error:", error)
+      const errorMessage = error instanceof Error ? error.message : "Invalid email or password. Please try again."
       toast.error("Login Failed", {
-        description: error.message || "Invalid email or password. Please try again.",
+        description: errorMessage,
       })
     } finally {
       setIsLoading(false)
