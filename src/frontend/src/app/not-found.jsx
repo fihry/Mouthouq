@@ -73,22 +73,22 @@ export default function NotFound() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/services?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
   const popularServices = [
-    { name: "House Cleaning", icon: "🏠", href: "/services/cleaning" },
-    { name: "Plumbing", icon: "🔧", href: "/services/plumbing" },
-    { name: "AC Repair", icon: "❄️", href: "/services/ac-repair" },
-    { name: "Electrical Work", icon: "⚡", href: "/services/electrical" },
+    { name: "House Cleaning", icon: "🏠", href: "/services?category=House%20Cleaning" },
+    { name: "Plumbing", icon: "🔧", href: "/services?category=Plumbing" },
+    { name: "AC Repair", icon: "❄️", href: "/services?category=AC%20Repair" },
+    { name: "Electrical Work", icon: "⚡", href: "/services?category=Electrical%20Work" },
   ];
 
   const quickLinks = [
-    { name: "Find Professionals", icon: Users, href: "/professionals" },
-    { name: "Post a Request", icon: Wrench, href: "/post-request" },
-    { name: "Contact Support", icon: Phone, href: "/contact" },
-    { name: "Service Areas", icon: MapPin, href: "/areas" },
+    { name: "Find Professionals", icon: Users, href: "/services" },
+    { name: "Post a Request", icon: Wrench, href: "/services" },
+    { name: "Contact Support", icon: Phone, href: "/" },
+    { name: "Service Areas", icon: MapPin, href: "/services" },
   ];
 
   return (
