@@ -45,19 +45,19 @@ export default function ServicesPage() {
   const [minRating, setMinRating] = useState(0)
   const [maxDistance, setMaxDistance] = useState(50)
   const [showEmergencyOnly, setShowEmergencyOnly] = useState(false)
-  const [userRole, setUserRole] = useState<string | null>(null)
+  const [userType, setUserType] = useState<string | null>(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false)
 
   useEffect(() => {
     fetchServices()
 
-    // Check user role from localStorage
+    // Check user type from localStorage
     const userStr = localStorage.getItem("user")
     if (userStr) {
       try {
         const user = JSON.parse(userStr)
-        setUserRole(user.role)
+        setUserType(user.userType || null)
       } catch (error) {
         console.error("Failed to parse user data:", error)
       }
@@ -210,7 +210,7 @@ export default function ServicesPage() {
                 </h1>
                 <p className="text-gray-600 mt-1">Discover verified professionals for all your needs</p>
               </div>
-              {userRole === "professional" && (
+              {(userType === "professional" || userType === "company") && (
                 <Button
                   onClick={() => setIsCreateModalOpen(true)}
                   className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold shadow-lg"

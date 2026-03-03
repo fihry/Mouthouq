@@ -79,9 +79,15 @@ export default function LoginPage() {
         description: "You have successfully logged in.",
       })
 
+      const authenticatedUserType = response?.user?.userType
+
       // Handle success - redirect to dashboard after a brief delay
       setTimeout(() => {
-        window.location.href = userType === "professional" ? "/dashboard/professional" : "/dashboard/customer"
+        if (authenticatedUserType === "professional" || authenticatedUserType === "company") {
+          window.location.href = "/dashboard/professional"
+          return
+        }
+        window.location.href = "/dashboard/customer"
       }, 500)
     } catch (error) {
       console.error("Login error:", error)
